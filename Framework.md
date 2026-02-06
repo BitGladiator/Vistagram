@@ -65,3 +65,22 @@
 
 ## 2. High-Level Architecture
 ![Design](images/High-Level%20Design.jpg)
+
+### 2.2 Core Components
+
+#### Client Layer
+- **Web Application**: React/Next.js SPA
+- **Mobile Apps**: iOS (Swift) and Android (Kotlin)
+- **Progressive Web App** (PWA) support
+
+#### Edge Layer
+- **CDN**: CloudFlare/CloudFront for static assets and media
+- **Load Balancers**: Distribute traffic across API servers
+- **DDoS Protection**: Rate limiting and security
+
+#### API Gateway
+- **Authentication & Authorization**: JWT tokens
+- **Request Routing**: Direct requests to appropriate services
+- **Rate Limiting**: Prevent abuse
+- **API Versioning**: Support multiple API versions
+- **Protocol Translation**: REST to gRPC
