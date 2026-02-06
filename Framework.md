@@ -60,3 +60,8 @@
 
 #### Consistency Requirements
 ![Consistency](images/Consistency.jpg)
+
+---
+
+## 2. High-Level Architecture
+![Design](images/High-Level%20Design.jpg)
