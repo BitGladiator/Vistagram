@@ -49,3 +49,14 @@
 
 ### 1.2 Non-Functional Requirements
 
+#### Scale Targets
+![Targets](images/Target.jpg)
+
+#### Performance Requirements
+![Performance](images/Performance.jpg)
+
+#### Availability & Reliability
+![Availability](images/Availablity.jpg)
+
+#### Consistency Requirements
+![Consistency](images/Consistency.jpg)
