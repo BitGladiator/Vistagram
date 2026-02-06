@@ -84,3 +84,6 @@
 - **Rate Limiting**: Prevent abuse
 - **API Versioning**: Support multiple API versions
 - **Protocol Translation**: REST to gRPC
+
+#### Service Layer (Microservices)
+![Service](images/Service%20Architecture.jpg)
