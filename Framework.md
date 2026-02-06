@@ -47,4 +47,5 @@
   - Push notifications support
   - In-app notification center
 
----
+### 1.2 Non-Functional Requirements
+
