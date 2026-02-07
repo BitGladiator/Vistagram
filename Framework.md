@@ -87,3 +87,14 @@
 
 #### Service Layer (Microservices)
 ![Service](images/Service%20Architecture.jpg)
+
+---
+
+## 3. Data Architecture
+
+### 3.1 Database Strategy
+
+#### Primary Databases
+
+**1. User Data - PostgreSQL (Relational)**
+![Users](images/User%20Schema.jpg)
