@@ -98,3 +98,6 @@
 
 **1. User Data - PostgreSQL (Relational)**
 ![Users](images/User%20Schema.jpg)
+
+**2. Post Data - PostgreSQL (Relational)**
+![Posts](images/Post%20Schema.jpg)
