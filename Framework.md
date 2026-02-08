@@ -104,3 +104,31 @@
 
 **3. Social Graph - PostgreSQL (Relational)**
 <img src="images/Social.jpg" width="500" />
+
+### 3.2 Caching Strategy
+
+**Redis Cache Layers:**
+
+1. **Hot Data Cache** (TTL: 1 hour)
+   - User profiles of active users
+   - Popular posts
+   - Trending hashtags
+
+2. **Feed Cache** (TTL: 5 minutes)
+   - Pre-computed home feeds
+   - User profile feeds
+   - Explore feed
+
+3. **Counter Cache** (No TTL, updated on write)
+   - Post like counts
+   - Comment counts
+   - Follower counts
+
+4. **Session Cache** (TTL: 24 hours)
+   - User authentication tokens
+   - Active sessions
+
+**Cache Invalidation:**
+- Write-through for critical data
+- Write-behind for analytics
+- Event-driven invalidation via message queue
