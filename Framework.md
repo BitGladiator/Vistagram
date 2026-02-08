@@ -97,10 +97,10 @@
 #### Primary Databases
 
 **1. User Data - PostgreSQL (Relational)**
-![Users](images/User%20Schema.jpg)
+<img src="images/User%20Schema.jpg" width="400" />
 
 **2. Post Data - PostgreSQL (Relational)**
-![Posts](images/Post%20Schema.jpg)
+<img src="images/Post%20Schema.jpg" width="400" />
 
 **3. Social Graph - PostgreSQL (Relational)**
-![Social](images/Social.jpg)
+<img src="images/Social.jpg" width="400" />
