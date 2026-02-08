@@ -50,21 +50,21 @@
 ### 1.2 Non-Functional Requirements
 
 #### Scale Targets
-![Targets](images/Target.jpg)
+<img src="images/Target.jpg" width="600" />
 
 #### Performance Requirements
-![Performance](images/Performance.jpg)
+<img src="images/Performance.jpg" width="600" />
 
 #### Availability & Reliability
-![Availability](images/Availablity.jpg)
+<img src="images/Availablity.jpg" width="600" />
 
 #### Consistency Requirements
-![Consistency](images/Consistency.jpg)
+<img src="images/Consistency.jpg" width="600" />
 
 ---
 
 ## 2. High-Level Architecture
-![Design](images/High-Level%20Design.jpg)
+<img src="images/High-Level%20Design.jpg" width="700" />
 
 ### 2.2 Core Components
 
@@ -86,7 +86,7 @@
 - **Protocol Translation**: REST to gRPC
 
 #### Service Layer (Microservices)
-![Service](images/Service%20Architecture.jpg)
+<img src="images/Service%20Architecture.jpg" width="700" />
 
 ---
 
@@ -97,10 +97,10 @@
 #### Primary Databases
 
 **1. User Data - PostgreSQL (Relational)**
-<img src="images/User%20Schema.jpg" width="400" />
+<img src="images/User%20Schema.jpg" width="500" />
 
 **2. Post Data - PostgreSQL (Relational)**
-<img src="images/Post%20Schema.jpg" width="400" />
+<img src="images/Post%20Schema.jpg" width="500" />
 
 **3. Social Graph - PostgreSQL (Relational)**
-<img src="images/Social.jpg" width="400" />
+<img src="images/Social.jpg" width="500" />
