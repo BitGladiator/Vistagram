@@ -132,3 +132,33 @@
 - Write-through for critical data
 - Write-behind for analytics
 - Event-driven invalidation via message queue
+
+### 3.3 Object Storage
+
+**MinIO (Self-hosted S3-compatible storage)**
+
+```
+/media
+  /images
+    /original
+      /{user_id}/{post_id}/{image_id}.jpg
+    /processed
+      /1080x1080/{user_id}/{post_id}/{image_id}.jpg
+      /640x640/{user_id}/{post_id}/{image_id}.jpg
+      /320x320/{user_id}/{post_id}/{image_id}.jpg
+  /videos
+    /original
+    /processed
+      /720p
+      /480p
+      /360p
+  /profiles
+    /{user_id}/profile.jpg
+```
+
+**Storage Optimization:**
+- Lazy deletion (mark as deleted, cleanup later)
+- Compression before storage
+- Multiple resolution variants
+- CDN integration for fast delivery (Cloudinary)
+
