@@ -101,3 +101,6 @@
 
 **2. Post Data - PostgreSQL (Relational)**
 ![Posts](images/Post%20Schema.jpg)
+
+**3. Social Graph - PostgreSQL (Relational)**
+![Social](images/Social.jpg)
