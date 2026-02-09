@@ -17,3 +17,6 @@
 1. Don't fan-out on write
 2. When follower requests feed, fetch posts from these users
 3. Merge with regular feed
+
+#### Feed Ranking Algorithm
+<img src="images/Feed Ranking.jpg" width="500" />
