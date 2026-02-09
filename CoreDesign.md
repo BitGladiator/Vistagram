@@ -238,7 +238,7 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
    - Both cloud-agnostic
    - Excellent performance globally
 
-### 6.1 Backend
+### 3.1 Backend
 
 **API Layer:**
 - **Language**: Node.js 
@@ -252,7 +252,7 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 - **Asynchronous**: RabbitMQ
 - **Service Discovery**: Kubernetes DNS
 
-### 6.2 Databases
+### 3.2 Databases
 
 - **Primary DB**: PostgreSQL 14+
 - **Cache**: Redis 7+ (Cluster mode)
@@ -261,7 +261,7 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 - **Search**: OpenSearch
 - **Object Storage**: MinIO (Self-hosted, S3-compatible)
 
-### 6.3 Frontend
+### 3.3 Frontend
 
 **Web:**
 - **Framework**: React 18+ 
@@ -274,7 +274,7 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 - **Android**: Kotlin 
 - **Alternative**: React Native 
 
-### 6.4 Infrastructure
+### 3.4 Infrastructure
 
 **Container Orchestration:**
 - **Kubernetes** (EKS / GKE / AKS)
@@ -295,3 +295,217 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 - Edge computing for image optimization
 
 ---
+
+## 4. API Design
+
+### 4.1 RESTful Endpoints
+
+#### User Service
+```
+POST   /api/v1/users/register
+POST   /api/v1/users/login
+GET    /api/v1/users/{user_id}
+PUT    /api/v1/users/{user_id}
+GET    /api/v1/users/{user_id}/followers
+GET    /api/v1/users/{user_id}/following
+POST   /api/v1/users/{user_id}/follow
+DELETE /api/v1/users/{user_id}/follow
+```
+
+#### Post Service
+```
+POST   /api/v1/posts
+GET    /api/v1/posts/{post_id}
+PUT    /api/v1/posts/{post_id}
+DELETE /api/v1/posts/{post_id}
+GET    /api/v1/posts/{post_id}/likes
+POST   /api/v1/posts/{post_id}/like
+DELETE /api/v1/posts/{post_id}/like
+GET    /api/v1/posts/{post_id}/comments
+POST   /api/v1/posts/{post_id}/comments
+```
+
+#### Feed Service
+```
+GET    /api/v1/feed/home?cursor={cursor}&limit=20
+GET    /api/v1/feed/explore?cursor={cursor}&limit=20
+GET    /api/v1/feed/user/{user_id}?cursor={cursor}&limit=20
+```
+
+#### Search Service
+```
+GET    /api/v1/search/users?q={query}&limit=10
+GET    /api/v1/search/hashtags?q={query}&limit=10
+GET    /api/v1/search/posts?q={query}&limit=20
+```
+
+#### Media Service
+```
+POST   /api/v1/media/upload-url
+GET    /api/v1/media/{media_id}
+```
+
+### 4.2 WebSocket Endpoints
+
+```
+WS     /ws/notifications
+WS     /ws/messages (Phase 2)
+```
+
+### 4.3 Response Format
+
+**Success Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "user_id": "123e4567.....",
+    "username": "johndoe",
+    "full_name": "John Doe"
+  },
+  "meta": {
+    "timestamp": "2025-02-06T10:30:00Z"
+  }
+}
+```
+
+**Error Response:**
+```json
+{
+  "status": "error",
+  "error": {
+    "code": "USER_NOT_FOUND",
+    "message": "The requested user does not exist",
+    "details": {}
+  },
+  "meta": {
+    "timestamp": "2025-02-06T10:30:00Z",
+    "request_id": "abc-123-def"
+  }
+}
+```
+
+### 4.4 Pagination
+
+**Cursor-based pagination** (preferred for feeds):
+```
+GET /api/v1/feed/home?cursor=e...
+
+Response:
+{
+  "data": [...],
+  "pagination": {
+    "next_cursor": "abcdef...",
+    "has_more": true
+  }
+}
+```
+
+---
+
+## 5. Security Considerations
+
+### 5.1 Authentication & Authorization
+
+**JWT-based Authentication:**
+- Access token (15 min expiry)
+- Refresh token (7 days expiry)
+- Stored in httpOnly cookies
+
+**Authorization Levels:**
+- Public content (anyone)
+- Authenticated users
+- Content owner only
+- Admin/moderator access
+
+### 5.2 Data Protection
+
+- **Encryption at Rest**: Database and S3 encryption
+- **Encryption in Transit**: TLS 1.3 for all communications
+- **Password Hashing**: bcrypt with salt (cost factor 12)
+- **PII Protection**: GDPR compliance, data minimization
+
+### 5.3 Rate Limiting
+
+**Per User:**
+- 100 requests per minute (general API)
+- 10 posts per hour
+- 100 follows per day
+- 1000 likes per day
+
+**Per IP:**
+- 1000 requests per minute
+- Protection against DDoS
+
+### 5.4 Content Moderation
+
+- **Automated**: ML-based content filtering
+- **Manual**: Reported content review queue
+- **NSFW Detection**: Image classification
+- **Spam Prevention**: Rate limiting, CAPTCHA
+
+---
+
+## 6. Monitoring & Observability
+
+### 6.1 Metrics to Track
+
+**System Metrics:**
+- Request rate (RPS)
+- Error rate (4xx, 5xx)
+- Response time (p50, p95, p99)
+- Database query time
+- Cache hit rate
+
+**Business Metrics:**
+- Daily Active Users (DAU)
+- Posts created per day
+- User engagement rate
+- Feed load time
+- Upload success rate
+
+### 6.2 Alerting
+
+**Critical Alerts:**
+- Service down (> 1 min)
+- Error rate > 5%
+- Database replication lag > 10 seconds
+- Disk usage > 85%
+
+**Warning Alerts:**
+- Response time > 1 second (p95)
+- Cache hit rate < 80%
+- Queue depth > 1000 messages
+
+### 6.3 Logging Strategy
+
+**Log Levels:**
+- ERROR: Application errors
+- WARN: Degraded performance
+- INFO: Important business events
+- DEBUG: Detailed troubleshooting
+
+**Structured Logging:**
+```json
+{
+  "timestamp": "2025-02-06T10:30:00Z",
+  "level": "INFO",
+  "service": "post-service",
+  "trace_id": "abc123",
+  "user_id": "user_123",
+  "event": "post_created",
+  "post_id": "post_456",
+  "duration_ms": 45
+}
+```
+
+---
+
+## 7. Deployment Strategy
+
+### 7.1 Environment Setup
+
+**Environments:**
+1. **Development**: Local development
+2. **Staging**: Production mirror for testing
+3. **Production**: Live environment
