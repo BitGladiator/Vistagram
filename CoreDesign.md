@@ -20,3 +20,6 @@
 
 #### Feed Ranking Algorithm
 <img src="images/Feed Ranking.jpg" width="500" />
+
+#### Implementation Flow
+<img src="images/Core Feed Design.jpg" width="500" />
