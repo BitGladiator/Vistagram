@@ -144,3 +144,68 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 
 **Search Query Flow:**
 <img src="images/Search Flow.jpg" width="600" />
+
+---
+
+## 2. Scalability Strategies
+
+### 2.1 Database Sharding
+
+**User Data Sharding:**
+- Shard key: user_id
+- Consistent hashing
+- 1024 logical shards -> mapped to physical servers
+
+**Post Data Sharding:**
+- Shard key: user_id 
+- Alternative: (user_id, created_at) for time-based queries
+
+**Social Graph Sharding:**
+- Shard key: follower_id for follows table
+- Replicate popular users across shards
+
+### 2.2 Caching Strategy
+
+**Multi-level Cache:**
+1. **Application Cache** (local): 
+   - In-memory cache per service instance
+   - TTL: 60 seconds
+   
+2. **Distributed Cache** (Redis):
+   - Shared across all instances
+   - TTL: 5-60 minutes
+   
+3. **CDN Cache**:
+   - Edge caching for media
+   - TTL: 24 hours
+
+**Cache Patterns:**
+- Cache-aside for reads
+- Write-through for critical data
+- Write-behind for analytics
+
+### 2.3 Load Balancing
+
+**Application Load Balancers:**
+- Round-robin with health checks
+- Sticky sessions for WebSocket connections
+- SSL termination at load balancer
+
+**Database Load Balancing:**
+- Read replicas for heavy read workload
+- Write to primary, read from replicas
+- Replica lag monitoring
+
+### 2.4 Horizontal Scaling
+
+**Stateless Services:**
+- All services are stateless
+- Easy to scale up/down
+- Auto-scaling based on CPU/memory
+
+**Stateful Components:**
+- Databases: Read replicas + sharding
+- Cache: Redis cluster
+- Message Queue: Kafka partitions
+
+---
