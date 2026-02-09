@@ -162,3 +162,33 @@
 - Multiple resolution variants
 - CDN integration for fast delivery (Cloudinary)
 
+### 3.4 Search Infrastructure
+
+**OpenSearch (Open-source Elasticsearch alternative)**
+
+```json
+{
+  "users_index": {
+    "user_id": "uuid",
+    "username": "text (analyzed)",
+    "full_name": "text (analyzed)",
+    "bio": "text",
+    "follower_count": "integer",
+    "is_verified": "boolean"
+  },
+  "hashtags_index": {
+    "hashtag": "keyword",
+    "post_count": "integer",
+    "trending_score": "float"
+  },
+  "posts_index": {
+    "post_id": "uuid",
+    "caption": "text",
+    "hashtags": "keyword[]",
+    "created_at": "date",
+    "like_count": "integer"
+  }
+}
+```
+
+---
