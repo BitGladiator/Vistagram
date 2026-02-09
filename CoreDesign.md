@@ -23,3 +23,22 @@
 
 #### Implementation Flow
 <img src="images/Core Feed Design.jpg" width="500" />
+
+## 4.2 Media Upload & Processing Pipeline
+
+#### Upload Flow
+```
+1. Client requests signed URL from Media Service
+2. Media Service generates MinIO presigned URL
+3. Client uploads directly to MinIO (bypassing backend)
+4. MinIO triggers webhook/processing service
+5. Processing service:
+   - Validates image
+   - Generates thumbnails (multiple sizes)
+   - Compresses original
+   - Extracts metadata (dimensions, EXIF)
+   - Updates database with URLs
+   - Publishes event to message queue
+6. Post Service receives event, creates post entry
+7. Feed Service fans out to followers
+```
