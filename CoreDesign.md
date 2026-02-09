@@ -85,7 +85,7 @@
 - Cache celebrity's recent posts heavily
 - Use dedicated read replicas for popular accounts
 
-### 4.4 Notification System
+### 1.4 Notification System
 
 **Architecture:**
 ```
