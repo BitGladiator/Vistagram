@@ -1,6 +1,6 @@
-## 4. Core System Designs
+## Core System Designs
 
-### 4.1 Feed Generation System
+### 1.1 Feed Generation System
 
 **Problem**: Generate personalized feed for 100M DAU efficiently
 
