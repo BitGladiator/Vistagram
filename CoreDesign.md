@@ -206,6 +206,92 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 **Stateful Components:**
 - Databases: Read replicas + sharding
 - Cache: Redis cluster
-- Message Queue: Kafka partitions
+- Message Queue: RabbitMQ partitions
+
+---
+
+## 3. Technology Stack
+
+
+1. **MinIO**
+   - S3-compatible API (easy migration if needed)
+   - Self-hosted = full control and cost savings
+   - High performance (can saturate network bandwidth)
+   - Deploy on your own hardware or any cloud provider
+   - No vendor lock-in
+
+2. **ScyllaDB**
+   - Drop-in Cassandra replacement (same CQL protocol)
+   - Written in C++ (vs Java) = 10x faster performance
+   - Lower latency (sub-millisecond p99)
+   - Better hardware utilization
+   - Smaller cluster = lower costs
+
+3. **OpenSearch**
+   - Open-source fork of Elasticsearch 7.10
+   - No licensing restrictions
+   - Community-driven development
+   - 100% compatible with Elasticsearch APIs
+
+4. **CloudFlare**
+   - CloudFlare: Free tier available, global network
+   - Both cloud-agnostic
+   - Excellent performance globally
+
+### 6.1 Backend
+
+**API Layer:**
+- **Language**: Node.js 
+- **Framework**: 
+  - Node.js: Express / Fastify
+  
+- **API Protocol**: REST + gRPC for inter-service
+
+**Service Communication:**
+- **Synchronous**: gRPC
+- **Asynchronous**: RabbitMQ
+- **Service Discovery**: Kubernetes DNS
+
+### 6.2 Databases
+
+- **Primary DB**: PostgreSQL 14+
+- **Cache**: Redis 7+ (Cluster mode)
+- **Graph DB**: PostgreSQL with extensions
+- **Time-series/Feed**: ScyllaDB (Cassandra-compatible, 10x faster)
+- **Search**: OpenSearch
+- **Object Storage**: MinIO (Self-hosted, S3-compatible)
+
+### 6.3 Frontend
+
+**Web:**
+- **Framework**: React 18+ 
+- **State Management**: Redux Toolkit
+- **Styling**: Tailwind CSS
+- **Build Tool**: Vite / Webpack
+
+**Mobile:**
+- **iOS**: Swift 
+- **Android**: Kotlin 
+- **Alternative**: React Native 
+
+### 6.4 Infrastructure
+
+**Container Orchestration:**
+- **Kubernetes** (EKS / GKE / AKS)
+- **Docker** for containerization
+
+**CI/CD:**
+- **GitHub Actions** 
+- **ArgoCD** for GitOps
+
+**Monitoring & Logging:**
+- **Metrics**: Prometheus + Grafana
+- **Logging**: Loki
+- **Tracing**: Jaeger
+- **APM**: SigNoz (open-source)
+
+**CDN & Edge:**
+- CloudFlare
+- Edge computing for image optimization
 
 ---
