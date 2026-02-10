@@ -44,7 +44,7 @@
 ```
 
 #### Feed Service Flow
-<img src="images/Feed Sevice.jpg" width="500" />
+<img src="images/Feed Sevice.jpg" width="650" />
 
 ---
 
@@ -515,3 +515,22 @@ Response:
 1. **Development**: Local development
 2. **Staging**: Production mirror for testing
 3. **Production**: Live environment
+
+### 7.2 CI/CD Pipeline
+<img src="images/CD.jpg" width="600" />
+
+### 7.3 Deployment Patterns
+
+**Blue-Green Deployment:**
+- Maintain two identical environments
+- Deploy to inactive environment
+- Switch traffic after validation
+- Easy rollback
+
+**Canary Deployment:**
+- Deploy to small percentage of traffic (5%)
+- Monitor metrics
+- Gradually increase if healthy
+- Full rollback if issues detected
+
+---
