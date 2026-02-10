@@ -1,32 +1,34 @@
-## Core System Designs
+# Core System Designs
 
-### 1.1 Feed Generation System
+## 1.1 Feed Generation System
 
 **Problem**: Generate personalized feed for 100M DAU efficiently
 
 **Solution**: Hybrid Push-Pull Model
 
-#### For Users with Few Followers (< 10K)
+### For Users with Few Followers (< 10K)
 **Push Model (Fan-out on Write)**
 1. When user posts, push post_id to all followers' feeds
 2. Store in Cassandra user_feed table
 3. Followers read from pre-computed feed
 
-#### For Users with Many Followers (> 10K - Celebrities)
+### For Users with Many Followers (> 10K - Celebrities)
 **Pull Model (Fan-out on Read)**
 1. Don't fan-out on write
 2. When follower requests feed, fetch posts from these users
 3. Merge with regular feed
 
-#### Feed Ranking Algorithm
+### Feed Ranking Algorithm
 <img src="images/Feed Ranking.jpg" width="500" />
 
-#### Implementation Flow
+### Implementation Flow
 <img src="images/Core Feed Design.jpg" width="500" />
+
+---
 
 ## 1.2 Media Upload & Processing Pipeline
 
-#### Upload Flow
+### Upload Flow
 ```
 1. Client requests signed URL from Media Service
 2. Media Service generates MinIO presigned URL
@@ -43,27 +45,27 @@
 7. Feed Service fans out to followers
 ```
 
-#### Feed Service Flow
+### Feed Service Flow
 <img src="images/Feed Sevice.jpg" width="650" />
 
----
-
-#### Image Processing Requirements
+### Image Processing Requirements
 - Original: Store as-is (compressed)
 - 1080x1080: Full size display
 - 640x640: Feed display
 - 320x320: Thumbnail
 - 150x150: Profile picture size
 
-#### Video Processing
+### Video Processing
 - Transcode to multiple bitrates (adaptive streaming)
 - Generate thumbnail from first frame
 - Extract duration and metadata
 - Compress for optimal delivery
 
-### 1.3 Social Graph Management
+---
 
-#### Follow/Unfollow System
+## 1.3 Social Graph Management
+
+### Follow/Unfollow System
 
 **Write Path:**
 ```
@@ -85,20 +87,23 @@
 3. Paginate results (cursor-based)
 4. Cache in Redis (TTL: 1 hour)
 ```
-#### Handling Celebrity Accounts
+
+### Handling Celebrity Accounts
 - Don't fan-out posts to all followers on write
 - Use pull model when followers request feed
 - Cache celebrity's recent posts heavily
 - Use dedicated read replicas for popular accounts
 
-### 1.4 Notification System
+---
+
+## 1.4 Notification System
 
 **Architecture:**
 ```
 Event Source → Message Queue → Notification Service → Push/WebSocket
 ```
 
-#### Notification Types
+### Notification Types
 1. **Social Notifications**
    - New follower
    - Post liked
@@ -109,7 +114,7 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
    - Posts from followed users
    - Trending content
 
-#### Implementation
+### Implementation
 ```
 1. Action occurs (e.g., like)
 2. Publish event to RabbitMQ
@@ -122,12 +127,14 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
    - Email digest (batched)
 ```
 
-#### Notification Batching
+### Notification Batching
 - Group similar notifications: "User A and 10 others liked your post"
 - Batch email notifications (hourly/daily digest)
 - Rate limit per user to prevent spam
 
-### 1.5 Search System
+---
+
+## 1.5 Search System
 
 **Multi-tiered Search:**
 
@@ -153,9 +160,9 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 
 ---
 
-## 2. Scalability Strategies
+# 2. Scalability Strategies
 
-### 2.1 Database Sharding
+## 2.1 Database Sharding
 
 **User Data Sharding:**
 - Shard key: user_id
@@ -170,7 +177,9 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 - Shard key: follower_id for follows table
 - Replicate popular users across shards
 
-### 2.2 Caching Strategy
+---
+
+## 2.2 Caching Strategy
 
 **Multi-level Cache:**
 1. **Application Cache** (local): 
@@ -190,7 +199,9 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 - Write-through for critical data
 - Write-behind for analytics
 
-### 2.3 Load Balancing
+---
+
+## 2.3 Load Balancing
 
 **Application Load Balancers:**
 - Round-robin with health checks
@@ -202,7 +213,9 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 - Write to primary, read from replicas
 - Replica lag monitoring
 
-### 2.4 Horizontal Scaling
+---
+
+## 2.4 Horizontal Scaling
 
 **Stateless Services:**
 - All services are stateless
@@ -216,8 +229,7 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 
 ---
 
-## 3. Technology Stack
-
+# 3. Technology Stack
 
 1. **MinIO**
    - S3-compatible API (easy migration if needed)
@@ -244,7 +256,9 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
    - Both cloud-agnostic
    - Excellent performance globally
 
-### 3.1 Backend
+---
+
+## 3.1 Backend
 
 **API Layer:**
 - **Language**: Node.js 
@@ -258,7 +272,9 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 - **Asynchronous**: RabbitMQ
 - **Service Discovery**: Kubernetes DNS
 
-### 3.2 Databases
+---
+
+## 3.2 Databases
 
 - **Primary DB**: PostgreSQL 14+
 - **Cache**: Redis 7+ (Cluster mode)
@@ -267,7 +283,9 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 - **Search**: OpenSearch
 - **Object Storage**: MinIO (Self-hosted, S3-compatible)
 
-### 3.3 Frontend
+---
+
+## 3.3 Frontend
 
 **Web:**
 - **Framework**: React 18+ 
@@ -280,7 +298,9 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 - **Android**: Kotlin 
 - **Alternative**: React Native 
 
-### 3.4 Infrastructure
+---
+
+## 3.4 Infrastructure
 
 **Container Orchestration:**
 - **Kubernetes** (EKS / GKE / AKS)
@@ -302,11 +322,11 @@ Event Source → Message Queue → Notification Service → Push/WebSocket
 
 ---
 
-## 4. API Design
+# 4. API Design
 
-### 4.1 RESTful Endpoints
+## 4.1 RESTful Endpoints
 
-#### User Service
+### User Service
 ```
 POST   /api/v1/users/register
 POST   /api/v1/users/login
@@ -318,7 +338,7 @@ POST   /api/v1/users/{user_id}/follow
 DELETE /api/v1/users/{user_id}/follow
 ```
 
-#### Post Service
+### Post Service
 ```
 POST   /api/v1/posts
 GET    /api/v1/posts/{post_id}
@@ -331,34 +351,38 @@ GET    /api/v1/posts/{post_id}/comments
 POST   /api/v1/posts/{post_id}/comments
 ```
 
-#### Feed Service
+### Feed Service
 ```
 GET    /api/v1/feed/home?cursor={cursor}&limit=20
 GET    /api/v1/feed/explore?cursor={cursor}&limit=20
 GET    /api/v1/feed/user/{user_id}?cursor={cursor}&limit=20
 ```
 
-#### Search Service
+### Search Service
 ```
 GET    /api/v1/search/users?q={query}&limit=10
 GET    /api/v1/search/hashtags?q={query}&limit=10
 GET    /api/v1/search/posts?q={query}&limit=20
 ```
 
-#### Media Service
+### Media Service
 ```
 POST   /api/v1/media/upload-url
 GET    /api/v1/media/{media_id}
 ```
 
-### 4.2 WebSocket Endpoints
+---
+
+## 4.2 WebSocket Endpoints
 
 ```
 WS     /ws/notifications
 WS     /ws/messages (Phase 2)
 ```
 
-### 4.3 Response Format
+---
+
+## 4.3 Response Format
 
 **Success Response:**
 ```json
@@ -391,7 +415,9 @@ WS     /ws/messages (Phase 2)
 }
 ```
 
-### 4.4 Pagination
+---
+
+## 4.4 Pagination
 
 **Cursor-based pagination** (preferred for feeds):
 ```
@@ -409,9 +435,9 @@ Response:
 
 ---
 
-## 5. Security Considerations
+# 5. Security Considerations
 
-### 5.1 Authentication & Authorization
+## 5.1 Authentication & Authorization
 
 **JWT-based Authentication:**
 - Access token (15 min expiry)
@@ -424,14 +450,18 @@ Response:
 - Content owner only
 - Admin/moderator access
 
-### 5.2 Data Protection
+---
+
+## 5.2 Data Protection
 
 - **Encryption at Rest**: Database and S3 encryption
 - **Encryption in Transit**: TLS 1.3 for all communications
 - **Password Hashing**: bcrypt with salt (cost factor 12)
 - **PII Protection**: GDPR compliance, data minimization
 
-### 5.3 Rate Limiting
+---
+
+## 5.3 Rate Limiting
 
 **Per User:**
 - 100 requests per minute (general API)
@@ -443,7 +473,9 @@ Response:
 - 1000 requests per minute
 - Protection against DDoS
 
-### 5.4 Content Moderation
+---
+
+## 5.4 Content Moderation
 
 - **Automated**: ML-based content filtering
 - **Manual**: Reported content review queue
@@ -452,9 +484,9 @@ Response:
 
 ---
 
-## 6. Monitoring & Observability
+# 6. Monitoring & Observability
 
-### 6.1 Metrics to Track
+## 6.1 Metrics to Track
 
 **System Metrics:**
 - Request rate (RPS)
@@ -470,7 +502,9 @@ Response:
 - Feed load time
 - Upload success rate
 
-### 6.2 Alerting
+---
+
+## 6.2 Alerting
 
 **Critical Alerts:**
 - Service down (> 1 min)
@@ -483,7 +517,9 @@ Response:
 - Cache hit rate < 80%
 - Queue depth > 1000 messages
 
-### 6.3 Logging Strategy
+---
+
+## 6.3 Logging Strategy
 
 **Log Levels:**
 - ERROR: Application errors
@@ -507,19 +543,23 @@ Response:
 
 ---
 
-## 7. Deployment Strategy
+# 7. Deployment Strategy
 
-### 7.1 Environment Setup
+## 7.1 Environment Setup
 
 **Environments:**
 1. **Development**: Local development
 2. **Staging**: Production mirror for testing
 3. **Production**: Live environment
 
-### 7.2 CI/CD Pipeline
+---
+
+## 7.2 CI/CD Pipeline
 <img src="images/CD.jpg" width="600" />
 
-### 7.3 Deployment Patterns
+---
+
+## 7.3 Deployment Patterns
 
 **Blue-Green Deployment:**
 - Maintain two identical environments
@@ -532,5 +572,3 @@ Response:
 - Monitor metrics
 - Gradually increase if healthy
 - Full rollback if issues detected
-
----
