@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: vistagram_dev_password
       POSTGRES_DB: vistagram
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - ../databases/postgres/data:/var/lib/postgresql/data
       - ../databases/postgres/schemas:/docker-entrypoint-initdb.d
