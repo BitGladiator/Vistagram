@@ -4,10 +4,19 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Function to update updated_at timestamp (needed in this database)
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Posts table
 CREATE TABLE posts (
     post_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL,  -- References users.user_id (foreign service)
+    user_id UUID NOT NULL, 
     caption TEXT,
     location VARCHAR(200),
     like_count INTEGER DEFAULT 0,
@@ -20,6 +29,7 @@ CREATE TABLE posts (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP
 );
+
 
 -- Post media table (supports multiple images/videos per post)
 CREATE TABLE post_media (
