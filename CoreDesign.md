@@ -42,6 +42,12 @@
 6. Post Service receives event, creates post entry
 7. Feed Service fans out to followers
 ```
+
+#### Feed Service Flow
+<img src="images/Feed Sevice.jpg" width="500" />
+
+---
+
 #### Image Processing Requirements
 - Original: Store as-is (compressed)
 - 1080x1080: Full size display
