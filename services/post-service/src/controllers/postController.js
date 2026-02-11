@@ -65,8 +65,8 @@ const getPost = async (req, res, next) => {
       `SELECT post_id, user_id, caption, location, like_count, comment_count, 
               view_count, is_archived, created_at, updated_at
        FROM posts 
-       WHERE post_id = $1 A
-       ND is_deleted = false`,
+       WHERE post_id = $1 
+       AND is_deleted = false`,
       [post_id]
     );
 
