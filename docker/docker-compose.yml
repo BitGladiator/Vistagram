@@ -7,7 +7,7 @@ services:
     container_name: vistagram-postgres
     environment:
       POSTGRES_USER: vistagram
-      POSTGRES_PASSWORD: vistagram_dev_password
+      POSTGRES_PASSWORD: vistagram123
       POSTGRES_DB: vistagram
     ports:
       - "5433:5432"
