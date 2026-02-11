@@ -9,12 +9,12 @@ const {
 } = require('../controllers/followController');
 const { authenticateUser } = require('../middleware/auth');
 
-router.use(authenticateUser);
+router.use(authenticateUser); // All routes require authentication
 
-router.post('/:followee_id', followUser);
-router.delete('/:followee_id', unfollowUser);
-router.get('/:user_id/followers', getFollowers);
-router.get('/:user_id/following', getFollowing);
-router.get('/:user_id/check', checkFollowing);
+router.post('/:followee_id', followUser); // POST /api/v1/users/:followee_id/follow
+router.delete('/:followee_id', unfollowUser); // DELETE /api/v1/users/:followee_id/follow
+router.get('/:user_id/followers', getFollowers); // GET /api/v1/users/:user_id/followers
+router.get('/:user_id/following', getFollowing); // GET /api/v1/users/:user_id/following
+router.get('/:user_id/check', checkFollowing); // GET /api/v1/users/:user_id/check
 
 module.exports = router;
