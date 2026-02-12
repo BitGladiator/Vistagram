@@ -19,7 +19,7 @@ const initBucket = async () => {
 
     if (!exists) {
       await minioClient.makeBucket(BUCKET_NAME, 'us-east-1');
-      console.log(`✅ Created MinIO bucket: ${BUCKET_NAME}`);
+      console.log(`Created MinIO bucket: ${BUCKET_NAME}`);
 
       // Set bucket policy to public read
       const policy = {
@@ -39,12 +39,12 @@ const initBucket = async () => {
         JSON.stringify(policy)
       );
 
-      console.log(`✅ Set public read policy on bucket: ${BUCKET_NAME}`);
+      console.log(`Set public read policy on bucket: ${BUCKET_NAME}`);
     } else {
-      console.log(`✅ MinIO bucket exists: ${BUCKET_NAME}`);
+      console.log(`MinIO bucket exists: ${BUCKET_NAME}`);
     }
   } catch (error) {
-    console.error('❌ MinIO initialization error:', error);
+    console.error('MinIO initialization error:', error);
     throw error;
   }
 };
@@ -61,10 +61,10 @@ const uploadFile = async (objectName, buffer, contentType) => {
     );
 
     const url = `${process.env.CDN_URL}/${objectName}`;
-    console.log(`✅ Uploaded file: ${objectName}`);
+    console.log(`Uploaded file: ${objectName}`);
     return url;
   } catch (error) {
-    console.error('❌ MinIO upload error:', error);
+    console.error('MinIO upload error:', error);
     throw error;
   }
 };
@@ -73,10 +73,10 @@ const uploadFile = async (objectName, buffer, contentType) => {
 const deleteFile = async (objectName) => {
   try {
     await minioClient.removeObject(BUCKET_NAME, objectName);
-    console.log(`✅ Deleted file: ${objectName}`);
+    console.log(`Deleted file: ${objectName}`);
     return true;
   } catch (error) {
-    console.error('❌ MinIO delete error:', error);
+    console.error('MinIO delete error:', error);
     throw error;
   }
 };
