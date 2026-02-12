@@ -59,7 +59,7 @@ const getHomeFeed = async (req, res, next) => {
 
     // Fetch posts from followed users (last 7 days)
     const postsResult = await queryPosts(
-      `SELECT 
+      `SELECT DISTINCT ON (p.post_id)
         p.post_id, p.user_id, p.caption, p.location,
         p.like_count, p.comment_count, p.created_at,
         pm.media_url, pm.thumbnail_url, pm.media_type
@@ -68,11 +68,10 @@ const getHomeFeed = async (req, res, next) => {
        WHERE p.user_id = ANY($1)
          AND p.is_deleted = false
          AND p.created_at > NOW() - INTERVAL '7 days'
-       ORDER BY p.created_at DESC
+       ORDER BY p.post_id, p.created_at DESC
        LIMIT 100`,
       [followingIds]
     );
-
     let posts = postsResult.rows;
 
     if (posts.length === 0) {
@@ -162,7 +161,7 @@ const getExploreFeed = async (req, res, next) => {
 
     // Get trending posts (most liked in last 48 hours)
     const result = await queryPosts(
-      `SELECT 
+      `SELECT DISTINCT ON (p.post_id)
         p.post_id, p.user_id, p.caption, p.location,
         p.like_count, p.comment_count, p.created_at,
         pm.media_url, pm.thumbnail_url, pm.media_type
@@ -170,7 +169,7 @@ const getExploreFeed = async (req, res, next) => {
        LEFT JOIN post_media pm ON p.post_id = pm.post_id AND pm.order_index = 0
        WHERE p.is_deleted = false
          AND p.created_at > NOW() - INTERVAL '48 hours'
-       ORDER BY (p.like_count + p.comment_count * 2) DESC, p.created_at DESC
+       ORDER BY p.post_id, (p.like_count + p.comment_count * 2) DESC, p.created_at DESC
        LIMIT 100`,
       []
     );
@@ -227,14 +226,14 @@ const getUserFeed = async (req, res, next) => {
 
     // Get user's posts ordered by newest
     const result = await queryPosts(
-      `SELECT 
+      `SELECT DISTINCT ON (p.post_id)
         p.post_id, p.user_id, p.caption, p.location,
         p.like_count, p.comment_count, p.created_at,
         pm.media_url, pm.thumbnail_url, pm.media_type
        FROM posts p
        LEFT JOIN post_media pm ON p.post_id = pm.post_id AND pm.order_index = 0
        WHERE p.user_id = $1 AND p.is_deleted = false
-       ORDER BY p.created_at DESC
+       ORDER BY p.post_id, p.created_at DESC
        LIMIT $2 OFFSET $3`,
       [user_id, limit, offset]
     );
