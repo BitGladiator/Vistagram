@@ -80,6 +80,51 @@ services:
       timeout: 10s
       retries: 5
 
+   # OpenSearch - Search Engine
+  opensearch:
+    image: opensearchproject/opensearch:2.11.0
+    container_name: vistagram-opensearch
+    environment:
+      - cluster.name=vistagram-cluster
+      - node.name=vistagram-node
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - plugins.security.disabled=true  # Disable security for local dev
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "9200:9200"   # REST API
+      - "9600:9600"   # Performance analyzer
+    volumes:
+      - ../databases/opensearch/data:/usr/share/opensearch/data
+    networks:
+      - vistagram-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # OpenSearch Dashboards (like Kibana)
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.11.0
+    container_name: vistagram-opensearch-dashboards
+    ports:
+      - "5601:5601"   # Dashboard UI
+    environment:
+      - OPENSEARCH_HOSTS=["http://opensearch:9200"]
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    networks:
+      - vistagram-network
+    depends_on:
+      - opensearch
+
 networks:
   vistagram-network:
     driver: bridge
