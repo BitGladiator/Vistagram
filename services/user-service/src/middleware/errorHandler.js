@@ -23,7 +23,10 @@ const errorHandler = (err, req, res, next) => {
       status = 400;
       message = 'Invalid reference';
     }
-  
+    if (err.code === '22P02') {
+      status = 400;
+      message = 'Invalid ID format';
+    }
     res.status(status).json({
       status: 'error',
       error: {

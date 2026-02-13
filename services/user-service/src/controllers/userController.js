@@ -1,6 +1,6 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { query } = require('../config/database');
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { query } = require("../config/database");
 
 // Register new user
 const register = async (req, res, next) => {
@@ -10,38 +10,50 @@ const register = async (req, res, next) => {
     // Validation
     if (!username || !email || !password || !full_name) {
       return res.status(400).json({
-        status: 'error',
+        status: "error",
         error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Username, email, password, and full name are required'
-        }
+          code: "VALIDATION_ERROR",
+          message: "Username, email, password, and full name are required",
+        },
       });
     }
 
     // Validate username length
     if (username.length < 3 || username.length > 30) {
       return res.status(400).json({
-        status: 'error',
+        status: "error",
         error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Username must be between 3 and 30 characters'
-        }
+          code: "VALIDATION_ERROR",
+          message: "Username must be between 3 and 30 characters",
+        },
       });
     }
 
     // Validate password strength
     if (password.length < 8) {
       return res.status(400).json({
-        status: 'error',
+        status: "error",
         error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Password must be at least 8 characters long'
-        }
+          code: "VALIDATION_ERROR",
+          message: "Password must be at least 8 characters long",
+        },
       });
     }
-
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        status: "error",
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Invalid email format",
+        },
+      });
+    }
     // Hash password
-    const password_hash = await bcrypt.hash(password, parseInt(process.env.BCRYPT_ROUNDS));
+    const password_hash = await bcrypt.hash(
+      password,
+      parseInt(process.env.BCRYPT_ROUNDS)
+    );
 
     // Insert user
     const result = await query(
@@ -54,10 +66,9 @@ const register = async (req, res, next) => {
     const user = result.rows[0];
 
     // Create user settings
-    await query(
-      `INSERT INTO user_settings (user_id) VALUES ($1)`,
-      [user.user_id]
-    );
+    await query(`INSERT INTO user_settings (user_id) VALUES ($1)`, [
+      user.user_id,
+    ]);
 
     // Generate JWT token
     const token = jwt.sign(
@@ -67,20 +78,20 @@ const register = async (req, res, next) => {
     );
 
     res.status(201).json({
-      status: 'success',
+      status: "success",
       data: {
         user: {
           user_id: user.user_id,
           username: user.username,
           email: user.email,
           full_name: user.full_name,
-          created_at: user.created_at
+          created_at: user.created_at,
         },
-        token: token
+        token: token,
       },
       meta: {
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   } catch (error) {
     next(error);
@@ -94,11 +105,11 @@ const login = async (req, res, next) => {
 
     if (!username || !password) {
       return res.status(400).json({
-        status: 'error',
+        status: "error",
         error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Username and password are required'
-        }
+          code: "VALIDATION_ERROR",
+          message: "Username and password are required",
+        },
       });
     }
 
@@ -112,11 +123,11 @@ const login = async (req, res, next) => {
 
     if (result.rows.length === 0) {
       return res.status(401).json({
-        status: 'error',
+        status: "error",
         error: {
-          code: 'INVALID_CREDENTIALS',
-          message: 'Invalid username or password'
-        }
+          code: "INVALID_CREDENTIALS",
+          message: "Invalid username or password",
+        },
       });
     }
 
@@ -125,11 +136,11 @@ const login = async (req, res, next) => {
     // Check if account is active
     if (!user.is_active) {
       return res.status(403).json({
-        status: 'error',
+        status: "error",
         error: {
-          code: 'ACCOUNT_DISABLED',
-          message: 'Account has been disabled'
-        }
+          code: "ACCOUNT_DISABLED",
+          message: "Account has been disabled",
+        },
       });
     }
 
@@ -138,19 +149,18 @@ const login = async (req, res, next) => {
 
     if (!validPassword) {
       return res.status(401).json({
-        status: 'error',
+        status: "error",
         error: {
-          code: 'INVALID_CREDENTIALS',
-          message: 'Invalid username or password'
-        }
+          code: "INVALID_CREDENTIALS",
+          message: "Invalid username or password",
+        },
       });
     }
 
     // Update last login
-    await query(
-      `UPDATE users SET last_login_at = NOW() WHERE user_id = $1`,
-      [user.user_id]
-    );
+    await query(`UPDATE users SET last_login_at = NOW() WHERE user_id = $1`, [
+      user.user_id,
+    ]);
 
     // Generate JWT token
     const token = jwt.sign(
@@ -160,19 +170,19 @@ const login = async (req, res, next) => {
     );
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         user: {
           user_id: user.user_id,
           username: user.username,
           email: user.email,
-          full_name: user.full_name
+          full_name: user.full_name,
         },
-        token: token
+        token: token,
       },
       meta: {
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   } catch (error) {
     next(error);
@@ -194,22 +204,22 @@ const getProfile = async (req, res, next) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        status: 'error',
+        status: "error",
         error: {
-          code: 'USER_NOT_FOUND',
-          message: 'User not found'
-        }
+          code: "USER_NOT_FOUND",
+          message: "User not found",
+        },
       });
     }
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
-        user: result.rows[0]
+        user: result.rows[0],
       },
       meta: {
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   } catch (error) {
     next(error);
@@ -219,5 +229,5 @@ const getProfile = async (req, res, next) => {
 module.exports = {
   register,
   login,
-  getProfile
+  getProfile,
 };
