@@ -1,11 +1,10 @@
--- Connect to users database
-\c vistagram_users;
+--ONLY FOR TEST PURPOSE 
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Users table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     username VARCHAR(30) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -26,8 +25,8 @@ CREATE TABLE users (
     CONSTRAINT email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 );
 
--- User sessions table (for JWT refresh tokens)
-CREATE TABLE user_sessions (
+-- User sessions table
+CREATE TABLE IF NOT EXISTS user_sessions (
     session_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     refresh_token_hash VARCHAR(255) NOT NULL,
@@ -39,7 +38,7 @@ CREATE TABLE user_sessions (
 );
 
 -- User settings table
-CREATE TABLE user_settings (
+CREATE TABLE IF NOT EXISTS user_settings (
     user_id UUID PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
     notification_likes BOOLEAN DEFAULT TRUE,
     notification_comments BOOLEAN DEFAULT TRUE,
@@ -50,14 +49,14 @@ CREATE TABLE user_settings (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes for performance
-CREATE INDEX idx_users_username ON users(username);
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_created_at ON users(created_at DESC);
-CREATE INDEX idx_sessions_user_id ON user_sessions(user_id);
-CREATE INDEX idx_sessions_expires_at ON user_sessions(expires_at);
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON user_sessions(expires_at);
 
--- Function to update updated_at timestamp
+-- Function to update updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -66,13 +65,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger to auto-update updated_at
-CREATE TRIGGER update_users_updated_at
-    BEFORE UPDATE ON users
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
--- Comments
-COMMENT ON TABLE users IS 'Core user account information';
-COMMENT ON TABLE user_sessions IS 'Active user sessions and refresh tokens';
-COMMENT ON TABLE user_settings IS 'User notification and privacy settings';
+-- Trigger
+DO $$ BEGIN
+    CREATE TRIGGER update_users_updated_at
+        BEFORE UPDATE ON users
+        FOR EACH ROW
+        EXECUTE FUNCTION update_updated_at_column();
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
