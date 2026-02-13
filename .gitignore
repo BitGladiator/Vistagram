@@ -39,3 +39,8 @@ temp/
 
 # Test coverage
 coverage/
+# Environment variables - NEVER commit these
+.env
+.env.*
+*.env
+!.env.example   

@@ -1,5 +1,4 @@
 -- Connect to users database
-\c vistagram_users;
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

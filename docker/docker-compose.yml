@@ -1,14 +1,234 @@
 version: '3.8'
 
+# Load secrets from .env.docker file
+# Run: docker-compose --env-file .env.docker up -d
+
 services:
-  # PostgreSQL - Primary Database
+
+  # ========================
+  # NGINX API Gateway
+  # ========================
+  nginx:
+    image: nginx:alpine
+    container_name: vistagram-nginx
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../services/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../services/nginx/conf.d:/etc/nginx/conf.d:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - user-service
+      - post-service
+      - social-service
+      - feed-service
+      - media-service
+      - notification-service
+      - search-service
+    networks:
+      - vistagram-network
+    restart: unless-stopped
+
+  # ========================
+  # Microservices
+  # ========================
+  user-service:
+    build:
+      context: ../services/user-service
+      dockerfile: Dockerfile
+    container_name: vistagram-user-service
+    environment:
+      - PORT=${USER_SERVICE_PORT}
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${USER_SERVICE_DB_NAME}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${USER_SERVICE_JWT_EXPIRES_IN}
+      - BCRYPT_ROUNDS=${USER_SERVICE_BCRYPT_ROUNDS}
+    networks:
+      - vistagram-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  post-service:
+    build:
+      context: ../services/post-service
+      dockerfile: Dockerfile
+    container_name: vistagram-post-service
+    environment:
+      - PORT=${POST_SERVICE_PORT}
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POST_SERVICE_DB_NAME}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - vistagram-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  social-service:
+    build:
+      context: ../services/social-service
+      dockerfile: Dockerfile
+    container_name: vistagram-social-service
+    environment:
+      - PORT=${SOCIAL_SERVICE_PORT}
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${SOCIAL_SERVICE_DB_NAME}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+    networks:
+      - vistagram-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  feed-service:
+    build:
+      context: ../services/feed-service
+      dockerfile: Dockerfile
+    container_name: vistagram-feed-service
+    environment:
+      - PORT=${FEED_SERVICE_PORT}
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - POSTS_DB_NAME=${FEED_SERVICE_POSTS_DB_NAME}
+      - SOCIAL_DB_NAME=${FEED_SERVICE_SOCIAL_DB_NAME}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_TTL=${FEED_SERVICE_REDIS_TTL}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      - FEED_PAGE_SIZE=${FEED_PAGE_SIZE}
+      - CELEBRITY_THRESHOLD=${CELEBRITY_THRESHOLD}
+    networks:
+      - vistagram-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  media-service:
+    build:
+      context: ../services/media-service
+      dockerfile: Dockerfile
+    container_name: vistagram-media-service
+    environment:
+      - PORT=${MEDIA_SERVICE_PORT}
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${MEDIA_SERVICE_DB_NAME}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - MINIO_USE_SSL=false
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
+      - CDN_URL=${CDN_URL}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+    networks:
+      - vistagram-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ../services/notification-service
+      dockerfile: Dockerfile
+    container_name: vistagram-notification-service
+    environment:
+      - PORT=${NOTIFICATION_SERVICE_PORT}
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${NOTIFICATION_SERVICE_DB_NAME}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+    networks:
+      - vistagram-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  search-service:
+    build:
+      context: ../services/search-service
+      dockerfile: Dockerfile
+    container_name: vistagram-search-service
+    environment:
+      - PORT=${SEARCH_SERVICE_PORT}
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - USERS_DB_NAME=${SEARCH_USERS_DB_NAME}
+      - POSTS_DB_NAME=${SEARCH_POSTS_DB_NAME}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - OPENSEARCH_URL=http://opensearch:9200
+      - OPENSEARCH_INDEX_USERS=${OPENSEARCH_INDEX_USERS}
+      - OPENSEARCH_INDEX_POSTS=${OPENSEARCH_INDEX_POSTS}
+      - OPENSEARCH_INDEX_HASHTAGS=${OPENSEARCH_INDEX_HASHTAGS}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAX_SEARCH_RESULTS=${MAX_SEARCH_RESULTS}
+      - MIN_QUERY_LENGTH=${MIN_QUERY_LENGTH}
+      - REDIS_SEARCH_TTL=${REDIS_SEARCH_TTL}
+    networks:
+      - vistagram-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ========================
+  # Infrastructure
+  # ========================
   postgres:
     image: postgres:15-alpine
     container_name: vistagram-postgres
     environment:
-      POSTGRES_USER: vistagram
-      POSTGRES_PASSWORD: vistagram123
-      POSTGRES_DB: vistagram
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5433:5432"
     volumes:
@@ -17,12 +237,11 @@ services:
     networks:
       - vistagram-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vistagram"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Redis - Cache
   redis:
     image: redis:7-alpine
     container_name: vistagram-redis
@@ -39,17 +258,16 @@ services:
       timeout: 3s
       retries: 5
 
-  # MinIO - Object Storage
   minio:
     image: minio/minio:latest
     container_name: vistagram-minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
-      - "9000:9000"  # API
-      - "9001:9001"  # Console
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - ../databases/minio/data:/data
     networks:
@@ -60,16 +278,15 @@ services:
       timeout: 20s
       retries: 3
 
-  # RabbitMQ - Message Queue 
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: vistagram-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: vistagram
-      RABBITMQ_DEFAULT_PASS: vistagram_dev_password
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
-      - "5672:5672"   # AMQP
-      - "15672:15672" # Management UI
+      - "5672:5672"
+      - "15672:15672"
     volumes:
       - ../databases/rabbitmq/data:/var/lib/rabbitmq
     networks:
@@ -80,7 +297,6 @@ services:
       timeout: 10s
       retries: 5
 
-   # OpenSearch - Search Engine
   opensearch:
     image: opensearchproject/opensearch:2.11.0
     container_name: vistagram-opensearch
@@ -90,7 +306,7 @@ services:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
-      - plugins.security.disabled=true  # Disable security for local dev
+      - plugins.security.disabled=true
     ulimits:
       memlock:
         soft: -1
@@ -99,8 +315,8 @@ services:
         soft: 65536
         hard: 65536
     ports:
-      - "9200:9200"   # REST API
-      - "9600:9600"   # Performance analyzer
+      - "9200:9200"
+      - "9600:9600"
     volumes:
       - ../databases/opensearch/data:/usr/share/opensearch/data
     networks:
@@ -111,12 +327,11 @@ services:
       timeout: 10s
       retries: 5
 
-  # OpenSearch Dashboards (like Kibana)
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.11.0
     container_name: vistagram-opensearch-dashboards
     ports:
-      - "5601:5601"   # Dashboard UI
+      - "5601:5601"
     environment:
       - OPENSEARCH_HOSTS=["http://opensearch:9200"]
       - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
@@ -124,6 +339,14 @@ services:
       - vistagram-network
     depends_on:
       - opensearch
+
+
+# Volumes
+volumes:
+  nginx_logs:
+
+
+# Networks
 
 networks:
   vistagram-network:
