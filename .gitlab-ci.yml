@@ -1,23 +1,16 @@
-# Vistagram CI/CD Pipeline
-# Stages run in order:
-# test → build → deploy
-
 stages:
   - test
   - build
-  - deploy
 
-
-# Global Variables
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
-  REGISTRY: $CI_REGISTRY  # GitLab's built-in container registry
 
+# ========================
+# TEST STAGE
+# ========================
 
-# Templates (reusable)
-# Template for Node.js test jobs
-.node_test_template: &node_test_template
+test:user-service:
   image: node:18-alpine
   stage: test
   services:
@@ -28,36 +21,42 @@ variables:
     POSTGRES_PASSWORD: vistagram123
     POSTGRES_DB: vistagram
     POSTGRES_HOST_AUTH_METHOD: trust
+    NODE_ENV: test
+    DB_HOST: postgres
+    DB_PORT: 5432
+    DB_NAME: vistagram_users_test
+    DB_USER: vistagram
+    DB_PASSWORD: vistagram123
+    JWT_SECRET: test-jwt-secret-key
+    JWT_EXPIRES_IN: 15m
+    BCRYPT_ROUNDS: 1
+    ALLOWED_ORIGINS: http://localhost:3000
   before_script:
-    - cd services/$SERVICE_NAME
+    - cd services/user-service
     - npm install
     - apk add --no-cache postgresql-client
+    # Wait for postgres to be ready
     - |
       until pg_isready -h postgres -U vistagram; do
         echo "Waiting for postgres..."
         sleep 2
       done
-    - echo "PostgreSQL is ready!"
-    - psql -h postgres -U vistagram -c "CREATE DATABASE ${TEST_DB_NAME};"
-    - psql -h postgres -U vistagram -d $TEST_DB_NAME -f ../../databases/postgres/schemas/$SCHEMA_FILE
+    # Create test database
+    - psql -h postgres -U vistagram -c "CREATE DATABASE vistagram_users_test;"
+    # Run test schema (no \c command)
+    - psql -h postgres -U vistagram -d vistagram_users_test -f ../../databases/postgres/schemas/02_users_schema_test.sql
   script:
     - npm test
-  coverage: '/Lines\s*:\s*(\d+\.?\d*)%/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: services/$SERVICE_NAME/coverage/cobertura-coverage.xml
-    paths:
-      - services/$SERVICE_NAME/coverage/
-    expire_in: 7 days
   only:
     - main
     - develop
     - merge_requests
 
-# Template for Docker build jobs
-.docker_build_template: &docker_build_template
+# ========================
+# BUILD STAGE
+# ========================
+
+build:user-service:
   image: docker:24
   stage: build
   services:
@@ -67,135 +66,120 @@ variables:
   script:
     - |
       docker build \
-        -t $REGISTRY/$CI_PROJECT_PATH/$SERVICE_NAME:$CI_COMMIT_SHA \
-        -t $REGISTRY/$CI_PROJECT_PATH/$SERVICE_NAME:latest \
-        -f services/$SERVICE_NAME/Dockerfile \
-        services/$SERVICE_NAME
-    - docker push $REGISTRY/$CI_PROJECT_PATH/$SERVICE_NAME:$CI_COMMIT_SHA
-    - docker push $REGISTRY/$CI_PROJECT_PATH/$SERVICE_NAME:latest
-  only:
-    - main
-
-
-# TEST STAGE
-
-test:user-service:
-  <<: *node_test_template
-  variables:
-    SERVICE_NAME: user-service
-    TEST_DB_NAME: vistagram_users_test
-    SCHEMA_FILE: 02_users_schema_test.sql
-    POSTGRES_USER: vistagram
-    POSTGRES_PASSWORD: vistagram123
-    POSTGRES_DB: vistagram
-    POSTGRES_HOST_AUTH_METHOD: trust
-
-test:post-service:
-  <<: *node_test_template
-  variables:
-    SERVICE_NAME: post-service
-    TEST_DB_NAME: vistagram_posts_test
-    SCHEMA_FILE: 03_posts_schema_test.sql
-    POSTGRES_USER: vistagram
-    POSTGRES_PASSWORD: vistagram123
-    POSTGRES_DB: vistagram
-    POSTGRES_HOST_AUTH_METHOD: trust
-
-
-# BUILD STAGE
-build:user-service:
-  <<: *docker_build_template
-  variables:
-    SERVICE_NAME: user-service
+        -t $CI_REGISTRY_IMAGE/user-service:$CI_COMMIT_SHA \
+        -t $CI_REGISTRY_IMAGE/user-service:latest \
+        services/user-service
+    - docker push $CI_REGISTRY_IMAGE/user-service:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE/user-service:latest
   needs:
     - test:user-service
-
-build:post-service:
-  <<: *docker_build_template
-  variables:
-    SERVICE_NAME: post-service
-  needs:
-    - test:post-service
-
-build:social-service:
-  <<: *docker_build_template
-  variables:
-    SERVICE_NAME: social-service
-  needs: []
-
-build:feed-service:
-  <<: *docker_build_template
-  variables:
-    SERVICE_NAME: feed-service
-  needs: []
-
-build:media-service:
-  <<: *docker_build_template
-  variables:
-    SERVICE_NAME: media-service
-  needs: []
-
-build:notification-service:
-  <<: *docker_build_template
-  variables:
-    SERVICE_NAME: notification-service
-  needs: []
-
-build:search-service:
-  <<: *docker_build_template
-  variables:
-    SERVICE_NAME: search-service
-  needs: []
-
-
-# DEPLOY STAGE
-deploy:production:
-  image: alpine:latest
-  stage: deploy
-  before_script:
-    - apk add --no-cache openssh-client
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
-  script:
-    - |
-      ssh $DEPLOY_USER@$DEPLOY_HOST << 'ENDSSH'
-        cd /app/vistagram
-
-        # Pull latest images
-        docker-compose --env-file .env.docker pull
-
-        # Restart services with zero downtime
-        docker-compose --env-file .env.docker up -d --no-deps --build
-
-        # Clean up old images
-        docker image prune -f
-
-        echo "Deployment complete!"
-      ENDSSH
-  environment:
-    name: production
-    url: http://$DEPLOY_HOST
-  needs:
-    - build:user-service
-    - build:post-service
-    - build:social-service
-    - build:feed-service
-    - build:media-service
-    - build:notification-service
-    - build:search-service
   only:
     - main
-```
 
----
+build:post-service:
+  image: docker:24
+  stage: build
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - |
+      docker build \
+        -t $CI_REGISTRY_IMAGE/post-service:$CI_COMMIT_SHA \
+        -t $CI_REGISTRY_IMAGE/post-service:latest \
+        services/post-service
+    - docker push $CI_REGISTRY_IMAGE/post-service:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE/post-service:latest
+  only:
+    - main
 
-## **Step 2: Set GitLab CI/CD Variables**
+build:social-service:
+  image: docker:24
+  stage: build
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - |
+      docker build \
+        -t $CI_REGISTRY_IMAGE/social-service:$CI_COMMIT_SHA \
+        -t $CI_REGISTRY_IMAGE/social-service:latest \
+        services/social-service
+    - docker push $CI_REGISTRY_IMAGE/social-service:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE/social-service:latest
+  only:
+    - main
 
-These are your secrets - stored safely in GitLab, not in code.
+build:feed-service:
+  image: docker:24
+  stage: build
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - |
+      docker build \
+        -t $CI_REGISTRY_IMAGE/feed-service:$CI_COMMIT_SHA \
+        -t $CI_REGISTRY_IMAGE/feed-service:latest \
+        services/feed-service
+    - docker push $CI_REGISTRY_IMAGE/feed-service:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE/feed-service:latest
+  only:
+    - main
 
-Go to your GitLab repo:
-```
-Settings → CI/CD → Variables → Add variable
+build:media-service:
+  image: docker:24
+  stage: build
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - |
+      docker build \
+        -t $CI_REGISTRY_IMAGE/media-service:$CI_COMMIT_SHA \
+        -t $CI_REGISTRY_IMAGE/media-service:latest \
+        services/media-service
+    - docker push $CI_REGISTRY_IMAGE/media-service:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE/media-service:latest
+  only:
+    - main
+
+build:notification-service:
+  image: docker:24
+  stage: build
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - |
+      docker build \
+        -t $CI_REGISTRY_IMAGE/notification-service:$CI_COMMIT_SHA \
+        -t $CI_REGISTRY_IMAGE/notification-service:latest \
+        services/notification-service
+    - docker push $CI_REGISTRY_IMAGE/notification-service:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE/notification-service:latest
+  only:
+    - main
+
+build:search-service:
+  image: docker:24
+  stage: build
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - |
+      docker build \
+        -t $CI_REGISTRY_IMAGE/search-service:$CI_COMMIT_SHA \
+        -t $CI_REGISTRY_IMAGE/search-service:latest \
+        services/search-service
+    - docker push $CI_REGISTRY_IMAGE/search-service:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE/search-service:latest
+  only:
+    - main
