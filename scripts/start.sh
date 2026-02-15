@@ -33,7 +33,7 @@ echo -e "${NC}"
 echo -e "${BOLD}  Instagram Clone Backend${NC}"
 echo ""
 
-# ---- Step 1: Check dependencies ------------
+# Step 1: Check dependencies
 echo -e "${BLUE}[1/4]${NC} Checking dependencies..."
 
 if ! command -v docker &> /dev/null; then
@@ -48,7 +48,7 @@ if ! command -v ngrok &> /dev/null; then
 fi
 echo -e "  ${GREEN}✓ Ngrok found${NC}"
 
-# ---- Step 2: Check env file ----------------
+# Step 2: Check env file 
 echo ""
 echo -e "${BLUE}[2/4]${NC} Checking environment..."
 
@@ -59,7 +59,7 @@ if [ ! -f "$DOCKER_DIR/$ENV_FILE" ]; then
 fi
 echo -e "  ${GREEN}✓ Environment file found${NC}"
 
-# ---- Step 3: Start Docker services ---------
+# Step 3: Start Docker services 
 echo ""
 echo -e "${BLUE}[3/4]${NC} Starting Docker services..."
 
@@ -92,7 +92,7 @@ fi
 
 cd - > /dev/null || exit 1
 
-# ---- Step 4: Start Ngrok tunnel ------------
+# Step 4: Start Ngrok tunnel 
 echo ""
 echo -e "${BLUE}[4/4]${NC} Starting public tunnel..."
 echo ""
@@ -117,7 +117,7 @@ echo ""
 # Start ngrok (this blocks until Ctrl+C)
 ngrok http --domain="$NGROK_DOMAIN" $API_PORT
 
-# ---- Cleanup on exit -----------------------
+# =Cleanup on exit 
 echo ""
 echo -e "${YELLOW}Tunnel closed.${NC}"
 echo -e "Docker services are still running in background."
