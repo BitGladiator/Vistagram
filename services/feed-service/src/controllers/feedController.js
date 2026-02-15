@@ -80,23 +80,15 @@ const getHomeFeed = async (req, res, next) => {
     }
 
     // Get user's interaction data for affinity scores
+    // Count how many posts the user has liked from each creator
     const interactionResult = await querySocial(
-      `SELECT 
-        l.post_id,
-        p.user_id as creator_id,
-        COUNT(*) as interaction_count
-       FROM likes l
-       JOIN (
-         SELECT post_id, user_id FROM (
-           SELECT $1::uuid as post_id, $1::uuid as user_id
-         ) t
-       ) p ON l.post_id = p.post_id
-       WHERE l.user_id = $1
-       GROUP BY l.post_id, p.user_id`,
+      `SELECT COUNT(*) as total_likes
+       FROM likes
+       WHERE user_id = $1`,
       [user_id]
     );
 
-    const totalInteractions = interactionResult.rows.length;
+    const totalInteractions = interactionResult.rows[0]?.total_likes || 0;
 
     // Apply ranking algorithm
     const rankedPosts = rankPosts(posts, {

@@ -10,10 +10,26 @@ const api = axios.create({
 
 // Attach token to every request automatically
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  // Some services use x-user-id directly
+  if (user) {
+    try {
+      const parsed = JSON.parse(user);
+      if (parsed.user_id) {
+        config.headers['x-user-id'] = parsed.user_id;
+      }
+    } catch (e) {}
+  }
+
   return config;
 });
+
 
 // Handle token expiry globally
 api.interceptors.response.use(

@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import Register from './pages/Register'
-
+import Feed from './pages/Feed'
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth(); // Use the useAuth hook
@@ -22,7 +22,8 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-      <Route path="/" element={<ProtectedRoute><div>Feed coming soon!</div></ProtectedRoute>} />
+      <Route path="/" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
+     
     </Routes>
   );
 }
