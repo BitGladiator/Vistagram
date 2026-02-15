@@ -5,8 +5,8 @@ import Register from './pages/Register'
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
-  if (loading) return <div>Loading...</div>;
+  const { isAuthenticated, loading } = useAuth(); // Use the useAuth hook
+  if (loading) return <div>Loading...</div>; 
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
