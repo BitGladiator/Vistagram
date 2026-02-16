@@ -798,14 +798,14 @@ export default function Feed() {
               <HeartIcon />
             </button>
             <button
-              onClick={logout}
+              onClick={() => navigate("/profile")}
               style={{
                 background: "none",
                 border: "none",
                 cursor: "pointer",
                 padding: 2,
               }}
-              title="Logout"
+              title="Profile"
             >
               <Avatar username={user?.username} size={24} />
             </button>
