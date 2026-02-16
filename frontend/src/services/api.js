@@ -54,7 +54,11 @@ export const authAPI = {
 export const userAPI = {
   getProfile: (userId) => api.get(`/api/v1/users/${userId}`),
 };
-
+export const mediaAPI = {
+  upload: (formData) => api.post('/api/v1/media/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+};
 // Posts
 export const postAPI = {
   create: (data) => api.post("/api/v1/posts", data),
