@@ -767,6 +767,7 @@ export default function Feed() {
               <HomeIcon filled />
             </button>
             <button
+              onClick={() => navigate("/explore")}
               style={{
                 background: "none",
                 border: "none",

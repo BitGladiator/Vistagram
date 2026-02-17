@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { userAPI, postAPI, socialAPI } from '../services/api';
 
@@ -156,7 +156,7 @@ export default function Profile() {
   const { userId } = useParams();
   const { user: currentUser, logout } = useAuth();
   const navigate = useNavigate();
-
+  const location = useLocation();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -174,7 +174,7 @@ export default function Profile() {
     if (!profileId) return;
     loadProfile();
     loadPosts();
-  }, [profileId]);
+  }, [profileId, location.state?.refresh]); 
 
   const loadProfile = async () => {
     try {
@@ -182,11 +182,11 @@ export default function Profile() {
       const res = await userAPI.getProfile(profileId);
       const profileData = res.data?.data?.user || res.data?.user;
       setProfile(profileData);
-      setStats({
-        posts: profileData?.post_count || 0,
+      setStats(s => ({
+        ...s,
         followers: profileData?.followers_count || 0,
         following: profileData?.following_count || 0,
-      });
+      }));
       setFollowing(profileData?.is_following || false);
     } catch (err) {
       console.error('Failed to load profile:', err);
@@ -201,7 +201,8 @@ export default function Profile() {
       const res = await postAPI.getUserPosts(profileId);
       const postsData = res.data?.data?.posts || res.data?.posts || [];
       setPosts(postsData);
-      setStats(s => ({ ...s, posts: postsData.length }));
+      const total = res.data?.data?.pagination?.total ?? postsData.length;
+      setStats(s => ({ ...s, posts: total }));
     } catch (err) {
       console.error('Failed to load posts:', err);
     } finally {

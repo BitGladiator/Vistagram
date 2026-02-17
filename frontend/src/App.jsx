@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Feed from "./pages/Feed";
 import CreatePost from "./pages/CreatePost";
+import Explore from "./pages/Explore";
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth(); // Use the useAuth hook
@@ -67,6 +68,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <CreatePost />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/explore"
+        element={
+          <ProtectedRoute>
+            <Explore />
           </ProtectedRoute>
         }
       />

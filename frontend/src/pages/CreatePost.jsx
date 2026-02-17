@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { postAPI, mediaAPI } from '../services/api';
 
+// ── Icons ─────────────────────────────────────────────────────────────────────
 
 const BackIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2">
@@ -29,6 +30,7 @@ const CloseIcon = () => (
   </svg>
 );
 
+// ── Avatar ────────────────────────────────────────────────────────────────────
 
 const Avatar = ({ username, size = 32 }) => {
   const colors = ['#f09433','#e6683c','#dc2743','#cc2366','#bc1888','#8a3ab9','#4c68d7'];
@@ -45,13 +47,17 @@ const Avatar = ({ username, size = 32 }) => {
   );
 };
 
+// ── Steps ─────────────────────────────────────────────────────────────────────
+// Step 1: Select photo
+// Step 2: Edit / preview
+// Step 3: Write caption + share
 
 export default function CreatePost() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
-  const [step, setStep] = useState(1); 
+  const [step, setStep] = useState(1); // 1 = select, 2 = preview, 3 = caption
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [caption, setCaption] = useState('');
@@ -63,7 +69,8 @@ export default function CreatePost() {
 
   const MAX_CHARS = 2200;
 
-  
+  // ── File handling ──────────────────────────────────────────────────────────
+
   const handleFile = useCallback((selectedFile) => {
     if (!selectedFile) return;
 
@@ -102,7 +109,7 @@ export default function CreatePost() {
   const handleDragOver = (e) => { e.preventDefault(); setDragOver(true); };
   const handleDragLeave = () => setDragOver(false);
 
-  
+  // ── Submit ─────────────────────────────────────────────────────────────────
 
   const handleShare = async () => {
     if (!caption.trim()) {
@@ -115,7 +122,7 @@ export default function CreatePost() {
     setUploadProgress(0);
 
     try {
-      // Create post
+      // Step 1: Create post
       setUploadProgress(20);
       const postRes = await postAPI.create({
         caption: caption.trim(),
@@ -125,7 +132,7 @@ export default function CreatePost() {
       const post_id = postRes.data.data.post.post_id;
       setUploadProgress(40);
 
-      // Upload image if selected
+      // Step 2: Upload image if selected
       if (file) {
         const formData = new FormData();
         formData.append('image', file);
@@ -138,7 +145,7 @@ export default function CreatePost() {
 
       setUploadProgress(100);
 
-    
+      // Success! Go to feed
       setTimeout(() => navigate('/'), 500);
 
     } catch (err) {
@@ -148,11 +155,11 @@ export default function CreatePost() {
     }
   };
 
- 
+  // ── Render: Step 1 - Select Photo ──────────────────────────────────────────
 
   const renderSelectStep = () => (
     <div style={styles.container}>
-    
+      {/* Header */}
       <div style={styles.header}>
         <button onClick={() => navigate('/')} style={styles.headerBtn}>
           <CloseIcon />
@@ -161,7 +168,7 @@ export default function CreatePost() {
         <div style={{ width: 40 }} />
       </div>
 
-     
+      {/* Drop zone */}
       <div
         style={{
           ...styles.dropzone,
@@ -195,7 +202,7 @@ export default function CreatePost() {
     </div>
   );
 
-  
+  // ── Render: Step 2 - Preview ───────────────────────────────────────────────
 
   const renderPreviewStep = () => (
     <div style={styles.container}>
@@ -230,10 +237,11 @@ export default function CreatePost() {
     </div>
   );
 
-  
+  // ── Render: Step 3 - Caption ───────────────────────────────────────────────
+
   const renderCaptionStep = () => (
     <div style={styles.container}>
-     
+      {/* Header */}
       <div style={styles.header}>
         <button onClick={() => setStep(2)} style={styles.headerBtn}>
           <BackIcon />
@@ -254,12 +262,12 @@ export default function CreatePost() {
       </div>
 
       <div style={styles.captionLayout}>
-
+        {/* Left: image thumbnail */}
         <div style={styles.thumbnailContainer}>
           <img src={preview} alt="preview" style={styles.thumbnail} />
         </div>
 
-        
+        {/* Right: caption */}
         <div style={styles.captionRight}>
           <div style={styles.captionUser}>
             <Avatar username={user?.username} size={28} />
@@ -298,7 +306,7 @@ export default function CreatePost() {
 
       <div style={styles.divider} />
 
-    
+      {/* Accessibility */}
       <div style={styles.optionRow}>
         <span style={styles.optionLabel}>Accessibility</span>
         <span style={styles.optionArrow}>›</span>
@@ -306,7 +314,7 @@ export default function CreatePost() {
 
       <div style={styles.divider} />
 
-     
+      {/* Advanced settings */}
       <div style={styles.optionRow}>
         <span style={styles.optionLabel}>Advanced settings</span>
         <span style={styles.optionArrow}>›</span>
@@ -314,10 +322,10 @@ export default function CreatePost() {
 
       <div style={styles.divider} />
 
-   
+      {/* Error */}
       {error && <p style={{ ...styles.error, padding: '12px 16px' }}>{error}</p>}
 
-      
+      {/* Progress bar */}
       {loading && (
         <div style={styles.progressContainer}>
           <div style={{ ...styles.progressBar, width: `${uploadProgress}%` }} />
@@ -331,11 +339,11 @@ export default function CreatePost() {
     </div>
   );
 
-  
+  // ── Main render ────────────────────────────────────────────────────────────
 
   return (
     <div style={styles.page}>
-      
+      {/* Top nav */}
       <div style={styles.navbar}>
         <div style={styles.navInner}>
           <h1
@@ -347,7 +355,7 @@ export default function CreatePost() {
         </div>
       </div>
 
-    
+      {/* Card */}
       <div style={styles.card}>
         {step === 1 && renderSelectStep()}
         {step === 2 && renderPreviewStep()}
@@ -357,7 +365,7 @@ export default function CreatePost() {
   );
 }
 
-
+// ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = {
   page: {
@@ -514,7 +522,7 @@ const styles = {
     fontSize: 20, color: '#8e8e8e',
   },
 
-
+  // Progress
   progressContainer: {
     padding: '16px',
   },
