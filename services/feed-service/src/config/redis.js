@@ -62,6 +62,22 @@ const del = async (key) => {
   }
 };
 
+// Delete multiple keys by pattern
+const delPattern = async (pattern) => {
+  try {
+    if (!client) return false;
+    const keys = await client.keys(pattern);
+    if (keys.length > 0) {
+      await client.del(keys);
+      console.log(`Deleted ${keys.length} keys matching pattern: ${pattern}`);
+    }
+    return true;
+  } catch (error) {
+    console.error('Redis DEL PATTERN error:', error);
+    return false;
+  }
+};
+
 // Check if key exists
 const exists = async (key) => {
   try {
@@ -79,5 +95,6 @@ module.exports = {
   get,
   set,
   del,
+  delPattern,
   exists
 };

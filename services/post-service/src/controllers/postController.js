@@ -1,5 +1,24 @@
 const { query } = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
+const axios = require('axios');
+
+const FEED_SERVICE_URL = process.env.FEED_SERVICE_URL || 'http://feed-service:3004';
+
+// Helper function to clear feed cache
+const clearFeedCache = async (userId) => {
+  try {
+    await axios.delete(`${FEED_SERVICE_URL}/api/v1/feed/cache`, {
+      headers: {
+        'x-user-id': userId
+      },
+      timeout: 2000 // 2 second timeout to avoid blocking
+    });
+    console.log(`✓ Cache cleared for user: ${userId}`);
+  } catch (error) {
+    // Log but don't fail the request if cache clearing fails
+    console.error(`✗ Failed to clear cache for user ${userId}:`, error.message);
+  }
+};
 
 // Create a new post
 const createPost = async (req, res, next) => {
@@ -38,6 +57,9 @@ const createPost = async (req, res, next) => {
     );
 
     const post = result.rows[0];
+
+    // Clear feed cache asynchronously (don't await to avoid blocking response)
+    clearFeedCache(user_id);
 
     // TODO: Publish event to message queue (for feed service)
     // TODO: Extract hashtags from caption
@@ -194,6 +216,9 @@ const updatePost = async (req, res, next) => {
       [caption, location, post_id]
     );
 
+    // Clear feed cache after update
+    clearFeedCache(user_id);
+
     res.status(200).json({
       status: 'success',
       data: {
@@ -247,6 +272,9 @@ const deletePost = async (req, res, next) => {
        WHERE post_id = $1`,
       [post_id]
     );
+
+    // Clear feed cache after deletion
+    clearFeedCache(user_id);
 
     // TODO: Publish event to remove from feeds
 

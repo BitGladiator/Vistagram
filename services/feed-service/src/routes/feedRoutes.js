@@ -13,6 +13,6 @@ router.use(authenticateUser);
 router.get('/home', getHomeFeed);
 router.get('/explore', getExploreFeed);
 router.get('/user/:user_id', getUserFeed);
-router.delete('/cache', authenticateUser, clearUserCache)
+router.delete('/cache', authenticateUser, clearUserCache);
 
 module.exports = router;

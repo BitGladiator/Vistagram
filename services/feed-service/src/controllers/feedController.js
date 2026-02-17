@@ -12,11 +12,18 @@ const clearCacheForUser = async (user_id) => {
     `feed:home:${user_id}`,
     `feed:explore:${user_id}`,
   ];
+
+  // Clear user-specific feed pages
   for (let page = 1; page <= 10; page++) {
     keysToDelete.push(`feed:user:${user_id}:${page}`);
   }
+
   await Promise.all(keysToDelete.map(key => redis.del(key)));
-  console.log(`Cache cleared for user: ${user_id} (${keysToDelete.length} keys)`);
+
+  // Clear ALL explore feeds (since new post could appear in anyone's explore feed)
+  await redis.delPattern('feed:explore:*');
+
+  console.log(`Cache cleared for user: ${user_id} (${keysToDelete.length} keys + all explore feeds)`);
 };
 
 // Get home feed for a user
