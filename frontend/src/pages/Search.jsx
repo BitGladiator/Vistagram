@@ -59,7 +59,6 @@ const UserResult = ({ user, onClick }) => (
       </div>
       <div style={styles.subtitle}>
         {user.full_name}
-        {user.follower_count > 0 && ` • ${user.follower_count.toLocaleString()} followers`}
       </div>
     </div>
   </div>
