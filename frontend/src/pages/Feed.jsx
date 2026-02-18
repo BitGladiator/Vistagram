@@ -728,7 +728,8 @@ export default function Feed() {
             Vistagram
           </h1>
 
-          <div
+          <button
+            onClick={() => navigate("/search")}
             style={{
               flex: 1,
               maxWidth: 268,
@@ -739,21 +740,20 @@ export default function Feed() {
               display: "flex",
               alignItems: "center",
               gap: 8,
+              border: "none",
+              cursor: "pointer",
             }}
           >
             <SearchIcon />
-            <input
-              placeholder="Search"
+            <span
               style={{
-                border: "none",
-                background: "none",
-                outline: "none",
                 fontSize: 14,
-                color: "#262626",
-                width: "100%",
+                color: "#8e8e8e",
               }}
-            />
-          </div>
+            >
+              Search
+            </span>
+          </button>
 
           <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
             <button

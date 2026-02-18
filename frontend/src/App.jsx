@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Feed from "./pages/Feed";
+import Search from "./pages/Search";
 import CreatePost from "./pages/CreatePost";
 import Explore from "./pages/Explore";
 // Protected route wrapper
@@ -76,6 +77,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <Explore />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/search"
+        element={
+          <ProtectedRoute>
+            <Search />
           </ProtectedRoute>
         }
       />
