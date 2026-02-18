@@ -65,7 +65,8 @@ export const postAPI = {
   getFeed: (params) => api.get('/api/v1/feed/home', { params }),
   getExploreFeed: (params) => api.get('/api/v1/feed/explore', { params }),
   getUserPosts: (userId) => api.get(`/api/v1/feed/user/${userId}`),
-  clearFeedCache: () => api.delete('/api/v1/feed/cache'), // ← add this
+  getPost: (postId) => api.get(`/api/v1/posts/${postId}`), 
+  clearFeedCache: () => api.delete('/api/v1/feed/cache'),
 };
 
 // Social

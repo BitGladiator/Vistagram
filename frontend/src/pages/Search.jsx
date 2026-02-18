@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { searchAPI } from '../services/api';
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
 
 const BackIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2">
@@ -30,7 +29,6 @@ const HashIcon = () => (
   </svg>
 );
 
-// ── Avatar ────────────────────────────────────────────────────────────────────
 
 const Avatar = ({ username, size = 44 }) => {
   const colors = ['#f09433','#e6683c','#dc2743','#cc2366','#bc1888','#8a3ab9','#4c68d7'];
@@ -47,7 +45,6 @@ const Avatar = ({ username, size = 44 }) => {
   );
 };
 
-// ── User Result ───────────────────────────────────────────────────────────────
 
 const UserResult = ({ user, onClick }) => (
   <div onClick={onClick} style={styles.resultItem}>
@@ -64,7 +61,7 @@ const UserResult = ({ user, onClick }) => (
   </div>
 );
 
-// ── Hashtag Result ────────────────────────────────────────────────────────────
+
 
 const HashtagResult = ({ hashtag, onClick }) => (
   <div onClick={onClick} style={styles.resultItem}>
@@ -104,7 +101,7 @@ const ResultSkeleton = () => (
   </div>
 );
 
-// ── Empty State ───────────────────────────────────────────────────────────────
+
 
 const EmptyState = ({ query, hasSearched }) => {
   if (!hasSearched) {
@@ -135,7 +132,6 @@ const EmptyState = ({ query, hasSearched }) => {
   );
 };
 
-// ── Main Search Page ──────────────────────────────────────────────────────────
 
 export default function Search() {
   const { user } = useAuth();
@@ -149,12 +145,12 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Auto-focus search input
+  
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  // Search on query change (debounced)
+  
   useEffect(() => {
     if (query.length < 2) {
       setResults({ users: [], hashtags: [] });
@@ -213,7 +209,6 @@ export default function Search() {
         }
       `}</style>
 
-      {/* ── Navbar ── */}
       <div style={{
         position: 'sticky', top: 0, zIndex: 100,
         backgroundColor: '#fff', borderBottom: '1px solid #dbdbdb', height: 60,
@@ -226,7 +221,6 @@ export default function Search() {
             <BackIcon />
           </button>
 
-          {/* Search input */}
           <div style={{ flex: 1, position: 'relative' }}>
             <div style={styles.searchBar}>
               <SearchIcon />
@@ -247,10 +241,10 @@ export default function Search() {
         </div>
       </div>
 
-      {/* ── Content ── */}
+
       <div style={{ maxWidth: 600, margin: '0 auto' }}>
 
-        {/* Tabs */}
+       
         {hasSearched && totalResults > 0 && (
           <div style={styles.tabs}>
             <button
@@ -286,20 +280,20 @@ export default function Search() {
           </div>
         )}
 
-        {/* Results */}
+    
         <div style={{ backgroundColor: '#fff' }}>
           {loading ? (
-            // Loading state
+         
             <div>
               {[1,2,3,4,5].map(i => <ResultSkeleton key={i} />)}
             </div>
           ) : totalResults === 0 ? (
-            // Empty state
+        
             <EmptyState query={query} hasSearched={hasSearched} />
           ) : (
-            // Results
+         
             <div>
-              {/* All tab */}
+            
               {activeTab === 'all' && (
                 <>
                   {results.users.length > 0 && (
@@ -330,7 +324,7 @@ export default function Search() {
                 </>
               )}
 
-              {/* Users tab */}
+            
               {activeTab === 'users' && (
                 <>
                   {results.users.length > 0 ? (
@@ -347,7 +341,7 @@ export default function Search() {
                 </>
               )}
 
-              {/* Hashtags tab */}
+            
               {activeTab === 'hashtags' && (
                 <>
                   {results.hashtags.length > 0 ? (
@@ -371,7 +365,7 @@ export default function Search() {
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+
 
 const styles = {
   backBtn: {
