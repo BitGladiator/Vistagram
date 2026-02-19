@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { postAPI, socialAPI } from "../services/api";
-
+import PostModal from "../components/PostModal";
 const HomeIcon = ({ filled }) => (
   <svg
     width="24"
@@ -233,7 +233,7 @@ const StoryItem = ({ username, isOwn = false }) => (
   </div>
 );
 
-const PostCard = ({ post, onLike }) => {
+const PostCard = ({ post, onLike, onPostClick }) => {
   const [liked, setLiked] = useState(post.is_liked || false);
   const [likeCount, setLikeCount] = useState(post.like_count || 0);
   const [saved, setSaved] = useState(false);
@@ -350,6 +350,7 @@ const PostCard = ({ post, onLike }) => {
           overflow: "hidden",
         }}
         onDoubleClick={handleDoubleClick}
+        onClick={() => onPostClick?.(post.post_id)}
       >
         <div
           style={{
@@ -632,6 +633,7 @@ export default function Feed() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(0);
+  const [selectedPostId, setSelectedPostId] = useState(null);
   const [hasMore, setHasMore] = useState(true);
 
   const storyUsers = [
@@ -947,7 +949,10 @@ export default function Feed() {
             <>
               {posts.map((post) => (
                 <div key={post.post_id} style={{ marginBottom: 24 }}>
-                  <PostCard post={post} />
+                  <PostCard
+                    post={post}
+                    onPostClick={(postId) => setSelectedPostId(postId)} 
+                  />
                 </div>
               ))}
 
@@ -1059,6 +1064,12 @@ export default function Feed() {
               subtitle={u.subtitle}
             />
           ))}
+          {selectedPostId && (
+            <PostModal
+              postId={selectedPostId}
+              onClose={() => setSelectedPostId(null)}
+            />
+          )}
 
           <div style={{ marginTop: 24 }}>
             <p style={{ fontSize: 11, color: "#c7c7c7", lineHeight: "16px" }}>

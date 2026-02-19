@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { userAPI, postAPI, socialAPI } from '../services/api';
-
+import PostModal from '../components/PostModal';
 
 const BackIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2">
@@ -88,7 +88,7 @@ const gradients = [
   'linear-gradient(135deg, #667eea, #764ba2)',
 ];
 
-const PostGridItem = ({ post }) => {
+const PostGridItem = ({ post, onClick }) => {
   const [hovered, setHovered] = useState(false);
   const gradient = gradients[post.post_id?.charCodeAt(0) % gradients.length] || gradients[0];
 
@@ -97,6 +97,7 @@ const PostGridItem = ({ post }) => {
       style={{ position: 'relative', aspectRatio: '1', cursor: 'pointer', overflow: 'hidden' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={onClick}
     >
       <div style={{
         width: '100%', height: '100%',
@@ -159,6 +160,7 @@ export default function Profile() {
   const location = useLocation();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [selectedPostId, setSelectedPostId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [postsLoading, setPostsLoading] = useState(true);
   const [following, setFollowing] = useState(false);
@@ -453,7 +455,11 @@ export default function Profile() {
             ) : (
               <div style={styles.grid}>
                 {posts.map(post => (
-                  <PostGridItem key={post.post_id} post={post} />
+                  <PostGridItem 
+                  key={post.post_id} 
+                  post={post} 
+                  onClick={() => setSelectedPostId(post.post_id)} 
+                />
                 ))}
               </div>
             )}
@@ -470,6 +476,12 @@ export default function Profile() {
         )}
 
       </div>
+      {selectedPostId && (
+        <PostModal
+          postId={selectedPostId}
+          onClose={() => setSelectedPostId(null)}
+        />
+      )}
     </div>
   );
 }
