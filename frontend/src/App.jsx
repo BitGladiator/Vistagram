@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Feed from "./pages/Feed";
 import Search from "./pages/Search";
+import Hashtag from './pages/Hashtag'
 import CreatePost from "./pages/CreatePost";
 import Explore from "./pages/Explore";
 // Protected route wrapper
@@ -88,6 +89,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/hashtag/:tag" element={<ProtectedRoute><Hashtag /></ProtectedRoute>} />
     </Routes>
   );
 }

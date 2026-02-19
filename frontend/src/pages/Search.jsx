@@ -193,8 +193,7 @@ export default function Search() {
   };
 
   const handleHashtagClick = (tag) => {
-    // Navigate to hashtag page (not implemented yet)
-    console.log('Hashtag clicked:', tag);
+    navigate(`/hashtag/${tag}`);
   };
 
   const totalResults = results.users.length + results.hashtags.length;

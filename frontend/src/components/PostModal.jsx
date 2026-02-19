@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { postAPI, socialAPI } from '../services/api';
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
 
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="#fff" strokeWidth="2">
@@ -47,7 +46,7 @@ const EmojiIcon = () => (
   </svg>
 );
 
-// ── Avatar ────────────────────────────────────────────────────────────────────
+
 
 const Avatar = ({ username, size = 32 }) => {
   const colors = ['#f09433','#e6683c','#dc2743','#cc2366','#bc1888','#8a3ab9','#4c68d7'];
@@ -102,8 +101,6 @@ const CommentItem = ({ comment }) => {
   );
 };
 
-// ── Main Modal ────────────────────────────────────────────────────────────────
-
 export default function PostModal({ postId, onClose }) {
   const { user } = useAuth();
   const [post, setPost] = useState(null);
@@ -157,7 +154,7 @@ export default function PostModal({ postId, onClose }) {
     try {
       await socialAPI.comment(postId, { content: newComment.trim() });
       setNewComment('');
-      loadPost(); // Reload to get new comment
+      loadPost(); 
     } catch (err) {
       console.error('Failed to comment:', err);
     }
@@ -181,12 +178,12 @@ export default function PostModal({ postId, onClose }) {
   ];
   const gradient = gradients[postId?.charCodeAt(0) % gradients.length] || gradients[0];
 
-  // Handle backdrop click
+ 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
 
-  // Handle ESC key
+  
   useEffect(() => {
     const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handleEsc);
@@ -209,14 +206,14 @@ export default function PostModal({ postId, onClose }) {
 
   return (
     <div style={styles.backdrop} onClick={handleBackdropClick}>
-      {/* Close button */}
+
       <button onClick={onClose} style={styles.closeBtn}>
         <CloseIcon />
       </button>
 
-      {/* Modal */}
+     
       <div style={styles.modal}>
-        {/* Left: Image */}
+       
         <div style={styles.leftPanel}>
           {post.media?.[0]?.media_url || post.media_url ? (
             <img
@@ -232,9 +229,9 @@ export default function PostModal({ postId, onClose }) {
           )}
         </div>
 
-        {/* Right: Details */}
+        
         <div style={styles.rightPanel}>
-          {/* Header */}
+          
           <div style={styles.header}>
             <Avatar username={post.username || user?.username} size={32} />
             <div style={{ flex: 1 }}>
@@ -244,9 +241,9 @@ export default function PostModal({ postId, onClose }) {
             <button style={styles.moreBtn}><MoreIcon /></button>
           </div>
 
-          {/* Comments section */}
+        
           <div style={styles.commentsSection}>
-            {/* Caption as first comment */}
+        
             {post.caption && (
               <div style={styles.comment}>
                 <Avatar username={post.username || user?.username} size={32} />
@@ -262,7 +259,7 @@ export default function PostModal({ postId, onClose }) {
               </div>
             )}
 
-            {/* Comments */}
+       
             {comments.length === 0 && !post.caption && (
               <div style={styles.noComments}>
                 <h3 style={{ fontSize: 22, fontWeight: '600', color: '#262626', marginBottom: 8 }}>
@@ -278,7 +275,7 @@ export default function PostModal({ postId, onClose }) {
             ))}
           </div>
 
-          {/* Actions */}
+         
           <div style={styles.actions}>
             <div style={styles.actionButtons}>
               <button onClick={handleLike} style={styles.actionBtn}>
@@ -291,20 +288,20 @@ export default function PostModal({ postId, onClose }) {
               </button>
             </div>
 
-            {/* Like count */}
+          
             {likeCount > 0 && (
               <div style={styles.likes}>
                 {likeCount.toLocaleString()} {likeCount === 1 ? 'like' : 'likes'}
               </div>
             )}
 
-            {/* Timestamp */}
+        
             <div style={styles.timestamp}>
               {timeAgo(post.created_at).toUpperCase()}
             </div>
           </div>
 
-          {/* Comment input */}
+       
           <form onSubmit={handleComment} style={styles.commentForm}>
             <button type="button" style={styles.emojiBtn}><EmojiIcon /></button>
             <input
@@ -323,7 +320,6 @@ export default function PostModal({ postId, onClose }) {
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = {
   backdrop: {

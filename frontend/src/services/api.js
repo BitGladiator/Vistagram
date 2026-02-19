@@ -81,6 +81,7 @@ export const socialAPI = {
 // Search
 export const searchAPI = {
   search: (q) => api.get("/api/v1/search", { params: { q } }),
+  searchPosts: (q, params) => api.get('/api/v1/search/posts', { params: { q, ...params } }),
   autocomplete: (q) =>
     api.get("/api/v1/search/autocomplete", { params: { q } }),
 };
