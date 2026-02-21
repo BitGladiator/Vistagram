@@ -1,10 +1,29 @@
-const { queryPosts, querySocial } = require('../config/database');
+const { queryPosts, querySocial, queryUsers } = require('../config/database');
 const redis = require('../config/redis');
 const { rankPosts } = require('../services/rankingService');
 
 const FEED_PAGE_SIZE = parseInt(process.env.FEED_PAGE_SIZE) || 20;
 const CELEBRITY_THRESHOLD = parseInt(process.env.CELEBRITY_THRESHOLD) || 10000;
 const CACHE_TTL = parseInt(process.env.REDIS_TTL) || 300;
+
+// ── Helper: enrich posts with username from users DB ──────────────────────────
+const enrichPostsWithUsernames = async (posts) => {
+  if (!posts || posts.length === 0) return posts;
+  const uniqueUserIds = [...new Set(posts.map(p => p.user_id))];
+  try {
+    const result = await queryUsers(
+      `SELECT user_id, username FROM users WHERE user_id = ANY($1)`,
+      [uniqueUserIds]
+    );
+    const usernameMap = {};
+    result.rows.forEach(r => { usernameMap[r.user_id] = r.username; });
+    return posts.map(p => ({ ...p, username: usernameMap[p.user_id] || 'user' }));
+  } catch (err) {
+    console.error('Failed to enrich posts with usernames:', err.message);
+    // Return posts without crashing — username will be missing but feed still shows
+    return posts;
+  }
+};
 
 // ── Helper: clear all cache for a user ───────────────────────────────────────
 const clearCacheForUser = async (user_id) => {
@@ -81,7 +100,7 @@ const getHomeFeed = async (req, res, next) => {
        LEFT JOIN post_media pm ON p.post_id = pm.post_id AND pm.order_index = 0
        WHERE p.user_id = ANY($1)
          AND p.is_deleted = false
-         AND p.created_at > NOW() - INTERVAL '7 days'
+         AND p.created_at > NOW() - INTERVAL '30 days'
        ORDER BY p.post_id, p.created_at DESC
        LIMIT 100`,
       [followingIds]
@@ -99,10 +118,13 @@ const getHomeFeed = async (req, res, next) => {
 
     const totalInteractions = interactionResult.rows[0]?.total_likes || 0;
 
-    const rankedPosts = rankPosts(posts, {
+    let rankedPosts = rankPosts(posts, {
       totalInteractions,
       userPreferences: null
     });
+
+    // Enrich with usernames
+    rankedPosts = await enrichPostsWithUsernames(rankedPosts);
 
     if (page === 1) {
       await redis.set(cacheKey, rankedPosts, CACHE_TTL);
@@ -162,14 +184,17 @@ const getExploreFeed = async (req, res, next) => {
        FROM posts p
        LEFT JOIN post_media pm ON p.post_id = pm.post_id AND pm.order_index = 0
        WHERE p.is_deleted = false
-         AND p.created_at > NOW() - INTERVAL '48 hours'
+         AND p.created_at > NOW() - INTERVAL '30 days'
        ORDER BY p.post_id, (p.like_count + p.comment_count * 2) DESC, p.created_at DESC
        LIMIT 100`,
       []
     );
 
     const posts = result.rows;
-    const rankedPosts = rankPosts(posts);
+    let rankedPosts = rankPosts(posts);
+
+    // Enrich with usernames
+    rankedPosts = await enrichPostsWithUsernames(rankedPosts);
 
     if (page === 1) {
       await redis.set(cacheKey, rankedPosts, CACHE_TTL);
@@ -232,7 +257,7 @@ const getUserFeed = async (req, res, next) => {
     );
 
     const responseData = {
-      posts: result.rows,
+      posts: await enrichPostsWithUsernames(result.rows),
       pagination: {
         page, limit,
         total: parseInt(countResult.rows[0].total),

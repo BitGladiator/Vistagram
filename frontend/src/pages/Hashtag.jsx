@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { searchAPI, postAPI } from '../services/api';
 import PostModal from '../components/PostModal';
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
+
 
 const BackIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2">
@@ -24,7 +24,6 @@ const CommentIcon = () => (
   </svg>
 );
 
-// ── Grid Item ─────────────────────────────────────────────────────────────────
 
 const gradients = [
   'linear-gradient(135deg, #f5af19, #f12711)',
@@ -72,7 +71,7 @@ const GridItem = ({ post, onClick }) => {
         )}
       </div>
 
-      {/* Hover overlay */}
+     
       {hovered && (
         <div style={{
           position: 'absolute', inset: 0,
@@ -98,7 +97,7 @@ const GridItem = ({ post, onClick }) => {
   );
 };
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
+
 
 const GridSkeleton = () => (
   <div style={styles.grid}>
@@ -116,7 +115,7 @@ const GridSkeleton = () => (
   </div>
 );
 
-// ── Main Hashtag Page ─────────────────────────────────────────────────────────
+
 
 export default function Hashtag() {
   const { tag } = useParams();
@@ -136,13 +135,13 @@ export default function Hashtag() {
     try {
       setLoading(true);
       
-      // Get hashtag info from search
+     
       const searchRes = await searchAPI.search(tag);
       const data = searchRes.data?.data || searchRes.data || {};
       const hashtagData = data.hashtags?.find(h => h.tag === tag);
       setHashtagInfo(hashtagData || { tag, post_count: 0 });
 
-      // Try to get posts via search API (searches in OpenSearch)
+   
       try {
         const postsRes = await searchAPI.searchPosts(`#${tag}`, { limit: 50 });
         const searchedPosts = postsRes.data?.data?.posts || postsRes.data?.posts || [];
@@ -150,8 +149,7 @@ export default function Hashtag() {
         if (searchedPosts.length > 0) {
           setPosts(searchedPosts);
         } else {
-          // Fallback: get from explore and filter client-side
-          // (OpenSearch might not have posts indexed yet)
+         
           const exploreRes = await postAPI.getExploreFeed({ limit: 50 });
           const allPosts = exploreRes.data?.data?.posts || [];
           const filteredPosts = allPosts.filter(p => 
@@ -161,7 +159,7 @@ export default function Hashtag() {
         }
       } catch (err) {
         console.warn('Search posts failed, using fallback:', err.message);
-        // Fallback to explore feed
+     
         const exploreRes = await postAPI.getExploreFeed({ limit: 50 });
         const allPosts = exploreRes.data?.data?.posts || [];
         const filteredPosts = allPosts.filter(p => 
@@ -188,7 +186,7 @@ export default function Hashtag() {
         }
       `}</style>
 
-      {/* ── Navbar ── */}
+     
       <div style={{
         position: 'sticky', top: 0, zIndex: 100,
         backgroundColor: '#fff', borderBottom: '1px solid #dbdbdb', height: 60,
@@ -214,12 +212,12 @@ export default function Hashtag() {
         </div>
       </div>
 
-      {/* ── Content ── */}
+
       <div style={{ maxWidth: 935, margin: '0 auto', padding: '0 20px' }}>
 
-        {/* Header */}
+      
         <div style={styles.header}>
-          {/* Hashtag icon */}
+         
           <div style={styles.hashIcon}>
             <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="1.5">
               <line x1="4" y1="9" x2="20" y2="9"/>
@@ -241,14 +239,14 @@ export default function Hashtag() {
           <button style={styles.followBtn}>Follow</button>
         </div>
 
-        {/* Top posts label */}
+     
         <div style={styles.sectionLabel}>
           <div style={styles.labelDash} />
           <span style={styles.labelText}>TOP POSTS</span>
           <div style={styles.labelDash} />
         </div>
 
-        {/* Posts grid */}
+
         {loading ? (
           <GridSkeleton />
         ) : posts.length === 0 ? (
@@ -271,7 +269,7 @@ export default function Hashtag() {
           </div>
         )}
 
-        {/* All posts label */}
+       
         {posts.length > 0 && (
           <>
             <div style={{ ...styles.sectionLabel, marginTop: 24 }}>
@@ -293,7 +291,7 @@ export default function Hashtag() {
         )}
       </div>
 
-      {/* Modal */}
+   
       {selectedPostId && (
         <PostModal
           postId={selectedPostId}
@@ -304,7 +302,7 @@ export default function Hashtag() {
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+
 
 const styles = {
   backBtn: {

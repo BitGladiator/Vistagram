@@ -656,7 +656,7 @@ export default function Feed() {
   const loadPosts = useCallback(async (pageNum = 0) => {
     try {
       setLoading(true);
-      const res = await postAPI.getFeed({ limit: 10, offset: pageNum * 10 });
+      const res = await postAPI.getFeed({ page: pageNum + 1, limit: 10 });
       const newPosts = res.data?.data?.posts || res.data?.posts || [];
       if (pageNum === 0) {
         setPosts(newPosts);
@@ -951,7 +951,7 @@ export default function Feed() {
                 <div key={post.post_id} style={{ marginBottom: 24 }}>
                   <PostCard
                     post={post}
-                    onPostClick={(postId) => setSelectedPostId(postId)} 
+                    onPostClick={(postId) => setSelectedPostId(postId)}
                   />
                 </div>
               ))}
