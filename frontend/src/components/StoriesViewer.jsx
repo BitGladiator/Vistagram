@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
 
 const CloseIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2">
@@ -33,7 +32,6 @@ const PlayIcon = () => (
   </svg>
 );
 
-// ── Avatar ────────────────────────────────────────────────────────────────────
 
 const Avatar = ({ username, size = 32 }) => {
   const colors = ['#f09433','#e6683c','#dc2743','#cc2366','#bc1888','#8a3ab9','#4c68d7'];
@@ -50,7 +48,7 @@ const Avatar = ({ username, size = 32 }) => {
   );
 };
 
-// ── Main Stories Viewer ───────────────────────────────────────────────────────
+
 
 export default function StoriesViewer({ 
   stories, // Array of story groups: [{ user_id, username, stories: [...] }]
@@ -69,7 +67,7 @@ export default function StoriesViewer({
   const currentStory = currentUserStories?.stories[currentStoryIndex];
   const totalStories = currentUserStories?.stories.length || 0;
 
-  // ── Progress bar ──────────────────────────────────────────────────────────
+ 
 
   useEffect(() => {
     if (!currentStory || paused) return;
@@ -97,7 +95,7 @@ export default function StoriesViewer({
     };
   }, [currentUserIndex, currentStoryIndex, paused]);
 
-  // ── Navigation ────────────────────────────────────────────────────────────
+  
 
   const goToNext = () => {
     if (currentStoryIndex < totalStories - 1) {
@@ -147,7 +145,7 @@ export default function StoriesViewer({
     }
   };
 
-  // ── Keyboard controls ─────────────────────────────────────────────────────
+  
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -161,7 +159,7 @@ export default function StoriesViewer({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentUserIndex, currentStoryIndex]);
 
-  // ── Click zones ───────────────────────────────────────────────────────────
+
 
   const handleClick = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -191,29 +189,29 @@ export default function StoriesViewer({
     <div style={styles.backdrop}>
       <div style={styles.container}>
         
-        {/* Close button */}
+     
         <button onClick={onClose} style={styles.closeBtn}>
           <CloseIcon />
         </button>
 
-        {/* Previous user button */}
+     
         {currentUserIndex > 0 && (
           <button onClick={goToPreviousUser} style={{ ...styles.navBtn, left: 20 }}>
             <ChevronLeft />
           </button>
         )}
 
-        {/* Next user button */}
+
         {currentUserIndex < stories.length - 1 && (
           <button onClick={goToNextUser} style={{ ...styles.navBtn, right: 20 }}>
             <ChevronRight />
           </button>
         )}
 
-        {/* Story card */}
+       
         <div style={styles.storyCard}>
           
-          {/* Progress bars */}
+         
           <div style={styles.progressBars}>
             {currentUserStories.stories.map((_, idx) => (
               <div key={idx} style={styles.progressBarOuter}>
@@ -230,7 +228,7 @@ export default function StoriesViewer({
             ))}
           </div>
 
-          {/* Header */}
+        
           <div style={styles.header}>
             <Avatar username={currentUserStories.username} size={32} />
             <div style={{ flex: 1 }}>
@@ -242,7 +240,7 @@ export default function StoriesViewer({
             </button>
           </div>
 
-          {/* Story content */}
+          
           <div
             style={styles.content}
             onClick={handleClick}
@@ -257,7 +255,7 @@ export default function StoriesViewer({
             />
           </div>
 
-          {/* View count (only for own stories) */}
+     
           {currentUserStories.user_id === user?.user_id && (
             <div style={styles.viewCount}>
               👁 {currentStory.view_count || 0} views
@@ -269,7 +267,7 @@ export default function StoriesViewer({
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+
 
 const styles = {
   backdrop: {
