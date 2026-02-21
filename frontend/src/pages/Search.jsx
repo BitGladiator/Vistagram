@@ -12,26 +12,26 @@ const BackIcon = () => (
 
 const SearchIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e8e" strokeWidth="2">
-    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
   </svg>
 );
 
 const CloseIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
 const HashIcon = () => (
   <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="1.5">
-    <line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/>
-    <line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>
+    <line x1="4" y1="9" x2="20" y2="9" /><line x1="4" y1="15" x2="20" y2="15" />
+    <line x1="10" y1="3" x2="8" y2="21" /><line x1="16" y1="3" x2="14" y2="21" />
   </svg>
 );
 
 
 const Avatar = ({ username, size = 44 }) => {
-  const colors = ['#f09433','#e6683c','#dc2743','#cc2366','#bc1888','#8a3ab9','#4c68d7'];
+  const colors = ['#f09433', '#e6683c', '#dc2743', '#cc2366', '#bc1888', '#8a3ab9', '#4c68d7'];
   const color = colors[username?.charCodeAt(0) % colors.length] || '#ccc';
   return (
     <div style={{
@@ -145,12 +145,12 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  
+
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  
+
   useEffect(() => {
     if (query.length < 2) {
       setResults({ users: [], hashtags: [] });
@@ -216,7 +216,7 @@ export default function Search() {
           maxWidth: 935, margin: '0 auto', height: '100%',
           display: 'flex', alignItems: 'center', padding: '0 20px', gap: 12,
         }}>
-          <button onClick={() => navigate(-1)} style={styles.backBtn}>
+          <button onClick={() => navigate('/')} style={styles.backBtn}>
             <BackIcon />
           </button>
 
@@ -243,7 +243,7 @@ export default function Search() {
 
       <div style={{ maxWidth: 600, margin: '0 auto' }}>
 
-       
+
         {hasSearched && totalResults > 0 && (
           <div style={styles.tabs}>
             <button
@@ -279,20 +279,20 @@ export default function Search() {
           </div>
         )}
 
-    
+
         <div style={{ backgroundColor: '#fff' }}>
           {loading ? (
-         
+
             <div>
-              {[1,2,3,4,5].map(i => <ResultSkeleton key={i} />)}
+              {[1, 2, 3, 4, 5].map(i => <ResultSkeleton key={i} />)}
             </div>
           ) : totalResults === 0 ? (
-        
+
             <EmptyState query={query} hasSearched={hasSearched} />
           ) : (
-         
+
             <div>
-            
+
               {activeTab === 'all' && (
                 <>
                   {results.users.length > 0 && (
@@ -323,7 +323,7 @@ export default function Search() {
                 </>
               )}
 
-            
+
               {activeTab === 'users' && (
                 <>
                   {results.users.length > 0 ? (
@@ -340,7 +340,7 @@ export default function Search() {
                 </>
               )}
 
-            
+
               {activeTab === 'hashtags' && (
                 <>
                   {results.hashtags.length > 0 ? (

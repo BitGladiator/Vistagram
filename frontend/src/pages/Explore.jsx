@@ -7,47 +7,47 @@ import { postAPI, searchAPI } from '../services/api';
 
 const SearchIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8e8e8e" strokeWidth="2">
-    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
   </svg>
 );
 
 const CloseIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="#262626" stroke="#262626" strokeWidth="2">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
 const HomeIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2">
-    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-    <polyline points="9 22 9 12 15 12 15 22"/>
+    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+    <polyline points="9 22 9 12 15 12 15 22" />
   </svg>
 );
 
 const ExploreIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="#262626" stroke="#262626" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+    <circle cx="12" cy="12" r="10" />
+    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
   </svg>
 );
 
 const PlusIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2">
-    <rect x="3" y="3" width="18" height="18" rx="2"/>
-    <line x1="12" y1="8" x2="12" y2="16"/>
-    <line x1="8" y1="12" x2="16" y2="12"/>
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <line x1="12" y1="8" x2="12" y2="16" />
+    <line x1="8" y1="12" x2="16" y2="12" />
   </svg>
 );
 
 const HeartIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2">
-    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
   </svg>
 );
 
 const CommentIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2">
-    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
   </svg>
 );
 
@@ -71,7 +71,7 @@ const getGradient = (id) =>
   gradients[(id?.charCodeAt(0) || 0) % gradients.length];
 
 const Avatar = ({ username, size = 24 }) => {
-  const colors = ['#f09433','#e6683c','#dc2743','#cc2366','#bc1888','#8a3ab9','#4c68d7'];
+  const colors = ['#f09433', '#e6683c', '#dc2743', '#cc2366', '#bc1888', '#8a3ab9', '#4c68d7'];
   const color = colors[username?.charCodeAt(0) % colors.length] || '#ccc';
   return (
     <div style={{
@@ -104,7 +104,7 @@ const GridItem = ({ post, span = 1 }) => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      
+
       <div style={{
         width: '100%', height: '100%',
         background: post.media_url ? 'none' : getGradient(post.post_id),
@@ -122,7 +122,7 @@ const GridItem = ({ post, span = 1 }) => {
         )}
       </div>
 
-      
+
       {hovered && (
         <div style={{
           position: 'absolute', inset: 0,
@@ -184,7 +184,7 @@ const SearchResults = ({ results, query, loading }) => {
   if (loading) {
     return (
       <div style={styles.searchResults}>
-        {[1,2,3,4].map(i => (
+        {[1, 2, 3, 4].map(i => (
           <div key={i} style={styles.searchResultItem}>
             <div style={{
               width: 44, height: 44, borderRadius: '50%',
@@ -258,7 +258,7 @@ export default function Explore() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
-  
+
 
   const loadPosts = useCallback(async (pageNum = 1, append = false) => {
     try {
@@ -282,7 +282,7 @@ export default function Explore() {
     loadPosts(1);
   }, [loadPosts]);
 
-  
+
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -318,7 +318,7 @@ export default function Explore() {
     setSearchFocused(false);
   };
 
- 
+
 
   const buildMosaicRows = (posts) => {
     const rows = [];
@@ -326,24 +326,24 @@ export default function Explore() {
     let rowIndex = 0;
 
     while (i < posts.length) {
-      const isFeaturedRow = rowIndex % 2 === 0; 
+      const isFeaturedRow = rowIndex % 2 === 0;
 
       if (isFeaturedRow) {
-      
+        // Featured on left (col 1, spans 2 rows), 4 smalls fill cols 2 & 3
         rows.push({
           type: 'left-featured',
           featured: posts[i],
-          smalls: posts.slice(i + 1, i + 3),
+          smalls: posts.slice(i + 1, i + 5),
         });
-        i += 3;
+        i += 5;
       } else {
-       
+        // 4 smalls fill cols 1 & 2, featured on right (col 3, spans 2 rows)
         rows.push({
           type: 'right-featured',
-          featured: posts[i + 2],
-          smalls: posts.slice(i, i + 2),
+          featured: posts[i + 4],
+          smalls: posts.slice(i, i + 4),
         });
-        i += 3;
+        i += 5;
       }
       rowIndex++;
     }
@@ -364,7 +364,7 @@ export default function Explore() {
         .search-input::placeholder { color: #8e8e8e; }
       `}</style>
 
-     
+
       <div style={{
         position: 'sticky', top: 0, zIndex: 100,
         backgroundColor: '#fff', borderBottom: '1px solid #dbdbdb', height: 60,
@@ -385,7 +385,7 @@ export default function Explore() {
             Vistagram
           </h1>
 
-         
+
           <div style={{ flex: 1, maxWidth: 400, position: 'relative' }}>
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8,
@@ -412,7 +412,7 @@ export default function Explore() {
               )}
             </div>
 
-           
+
             {searchFocused && (
               <div style={{
                 position: 'absolute', top: 'calc(100% + 8px)', left: 0, right: 0,
@@ -429,7 +429,7 @@ export default function Explore() {
             )}
           </div>
 
-        
+
           <div style={{ display: 'flex', alignItems: 'center', gap: 22, flexShrink: 0 }}>
             <button onClick={() => navigate('/')} style={styles.iconBtn}><HomeIcon /></button>
             <button onClick={() => navigate('/create')} style={styles.iconBtn}><PlusIcon /></button>
@@ -440,10 +440,10 @@ export default function Explore() {
         </div>
       </div>
 
-     
+
       <div style={{ maxWidth: 935, margin: '0 auto', padding: '24px 20px' }}>
 
-        
+
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <h2 style={{ fontSize: 16, fontWeight: '600', color: '#262626' }}>
             Explore
@@ -453,7 +453,7 @@ export default function Explore() {
           </span>
         </div>
 
-       
+
         {loading ? (
           <GridSkeleton />
         ) : posts.length === 0 ? (
@@ -479,7 +479,7 @@ export default function Explore() {
           </div>
         ) : (
           <>
-        
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {mosaicRows.map((row, rowIdx) => (
                 <div
@@ -494,34 +494,28 @@ export default function Explore() {
                 >
                   {row.type === 'left-featured' ? (
                     <>
-                    
+                      {/* Big feature on left (col 1, spans 2 rows) */}
                       {row.featured && (
                         <div style={{ gridColumn: '1', gridRow: '1 / span 2' }}>
                           <GridItem post={row.featured} span={2} />
                         </div>
                       )}
-                    
-                      {[0,1,2,3].map(i => {
-                        const post = posts[posts.indexOf(row.featured) + 1 + i];
-                        return post ? (
-                          <div key={i} style={{ gridColumn: i < 2 ? '2' : '3', gridRow: i % 2 === 0 ? '1' : '2' }}>
-                            <GridItem post={post} />
-                          </div>
-                        ) : null;
-                      })}
+                      {/* 4 small posts on cols 2 & 3 */}
+                      {row.smalls.map((post, i) => post ? (
+                        <div key={post.post_id} style={{ gridColumn: i < 2 ? '2' : '3', gridRow: i % 2 === 0 ? '1' : '2' }}>
+                          <GridItem post={post} />
+                        </div>
+                      ) : null)}
                     </>
                   ) : (
                     <>
-                     
-                      {[0,1,2,3].map(i => {
-                        const post = posts[posts.indexOf(row.featured) - 4 + i] || row.smalls?.[i];
-                        return post ? (
-                          <div key={i} style={{ gridColumn: i < 2 ? '1' : '2', gridRow: i % 2 === 0 ? '1' : '2' }}>
-                            <GridItem post={post} />
-                          </div>
-                        ) : null;
-                      })}
-                    
+                      {/* 4 small posts on cols 1 & 2 */}
+                      {row.smalls.map((post, i) => post ? (
+                        <div key={post.post_id} style={{ gridColumn: i < 2 ? '1' : '2', gridRow: i % 2 === 0 ? '1' : '2' }}>
+                          <GridItem post={post} />
+                        </div>
+                      ) : null)}
+                      {/* Big feature on right (col 3, spans 2 rows) */}
                       {row.featured && (
                         <div style={{ gridColumn: '3', gridRow: '1 / span 2' }}>
                           <GridItem post={row.featured} span={2} />
@@ -533,7 +527,7 @@ export default function Explore() {
               ))}
             </div>
 
-       
+
             {hasMore && (
               <div style={{ textAlign: 'center', padding: '32px 0' }}>
                 <button
