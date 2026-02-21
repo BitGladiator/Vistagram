@@ -77,7 +77,13 @@ export const socialAPI = {
   unlike: (postId) => api.delete(`/api/v1/likes/${postId}`),
   comment: (postId, data) => api.post(`/api/v1/comments/${postId}`, data),
 };
-
+export const storiesAPI = {
+  getFeed: () => api.get('/api/v1/stories/feed'),
+  getUserStories: (userId) => api.get(`/api/v1/stories/user/${userId}`),
+  markViewed: (storyId) => api.post(`/api/v1/stories/${storyId}/view`),
+  delete: (storyId) => api.delete(`/api/v1/stories/${storyId}`),
+  getViewers: (storyId) => api.get(`/api/v1/stories/${storyId}/viewers`),
+};
 // Search
 export const searchAPI = {
   search: (q) => api.get("/api/v1/search", { params: { q } }),
