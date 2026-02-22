@@ -7,12 +7,12 @@ const { createStory, getStoriesFeed, getUserStories, markStoryViewed, deleteStor
 router.post('/register', register);
 router.post('/login', login);
 
-router.post('/stories', authenticateUser, createStory);
-router.get('/stories/feed', authenticateUser, getStoriesFeed);
-router.get('/stories/user/:user_id', authenticateUser, getUserStories);
-router.post('/stories/:story_id/view', authenticateUser, markStoryViewed);
-router.delete('/stories/:story_id', authenticateUser, deleteStory);
-router.get('/stories/:story_id/viewers', authenticateUser, getStoryViewers);
+router.post('/stories', authenticateToken, createStory);
+router.get('/stories/feed', authenticateToken, getStoriesFeed);
+router.get('/stories/user/:user_id', authenticateToken, getUserStories);
+router.post('/stories/:story_id/view', authenticateToken, markStoryViewed);
+router.delete('/stories/:story_id', authenticateToken, deleteStory);
+router.get('/stories/:story_id/viewers', authenticateToken, getStoryViewers);
 
 
 // Protected routes

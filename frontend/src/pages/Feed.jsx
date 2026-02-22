@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { postAPI, socialAPI } from "../services/api";
+import { postAPI, socialAPI, storiesAPI } from "../services/api";
 import PostModal from "../components/PostModal";
+import CreateStory from "../components/CreateStory";
+import StoriesViewer from "../components/StoriesViewer";
 const HomeIcon = ({ filled }) => (
   <svg
     width="24"
@@ -181,7 +183,7 @@ const Avatar = ({ username, size = 32, hasStory = false }) => {
   );
 };
 
-const StoryItem = ({ username, isOwn = false }) => (
+const StoryItem = ({ username, isOwn = false, onClick }) => (
   <div
     style={{
       display: "flex",
@@ -191,6 +193,7 @@ const StoryItem = ({ username, isOwn = false }) => (
       cursor: "pointer",
       minWidth: 66,
     }}
+    onClick={onClick}
   >
     <div style={{ position: "relative" }}>
       <Avatar username={username} size={56} hasStory={!isOwn} />
@@ -635,6 +638,10 @@ export default function Feed() {
   const [page, setPage] = useState(0);
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [hasMore, setHasMore] = useState(true);
+  const [stories, setStories] = useState([]);
+  const [showStoriesViewer, setShowStoriesViewer] = useState(false);
+  const [showCreateStory, setShowCreateStory] = useState(false);
+  const [selectedStoryUser, setSelectedStoryUser] = useState(0);
 
   const storyUsers = [
     "bob",
@@ -671,10 +678,19 @@ export default function Feed() {
       setLoading(false);
     }
   }, []);
+  const loadStories = useCallback(async () => {
+    try {
+      const res = await storiesAPI.getFeed();
+      setStories(res.data?.data?.stories || []);
+    } catch (err) {
+      console.error("Failed to load stories:", err);
+    }
+  }, []);
 
   useEffect(() => {
     loadPosts(0);
-  }, [loadPosts]);
+    loadStories();
+  }, [loadPosts, loadStories]);
 
   return (
     <div style={{ backgroundColor: "#fafafa", minHeight: "100vh" }}>
@@ -845,9 +861,20 @@ export default function Feed() {
                 width: "max-content",
               }}
             >
-              <StoryItem username={user?.username} isOwn />
-              {storyUsers.map((u) => (
-                <StoryItem key={u} username={u} />
+              <StoryItem
+                username={user?.username}
+                isOwn
+                onClick={() => setShowCreateStory(true)}
+              />
+              {stories.map((storyGroup, idx) => (
+                <StoryItem
+                  key={storyGroup.user_id}
+                  username={storyGroup.username}
+                  onClick={() => {
+                    setSelectedStoryUser(idx);
+                    setShowStoriesViewer(true);
+                  }}
+                />
               ))}
             </div>
           </div>
@@ -1070,7 +1097,22 @@ export default function Feed() {
               onClose={() => setSelectedPostId(null)}
             />
           )}
+          {showStoriesViewer && (
+            <StoriesViewer
+              stories={stories}
+              initialUserIndex={selectedStoryUser}
+              onClose={() => setShowStoriesViewer(false)}
+            />
+          )}
 
+          {showCreateStory && (
+            <CreateStory
+              onClose={() => setShowCreateStory(false)}
+              onSuccess={() => {
+                loadStories();
+              }}
+            />
+          )}
           <div style={{ marginTop: 24 }}>
             <p style={{ fontSize: 11, color: "#c7c7c7", lineHeight: "16px" }}>
               About · Help · Press · API · Jobs · Privacy · Terms · Locations ·

@@ -58,6 +58,9 @@ export const mediaAPI = {
   upload: (formData) => api.post('/api/v1/media/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  uploadStory: (formData) => api.post('/api/v1/media/upload', formData, { // Same endpoint
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
 };
 // Posts
 export const postAPI = {
