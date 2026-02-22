@@ -4,37 +4,37 @@ import { useAuth } from '../context/AuthContext';
 
 const CloseIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
 const ChevronLeft = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="3">
-    <polyline points="15 18 9 12 15 6"/>
+    <polyline points="15 18 9 12 15 6" />
   </svg>
 );
 
 const ChevronRight = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="3">
-    <polyline points="9 18 15 12 9 6"/>
+    <polyline points="9 18 15 12 9 6" />
   </svg>
 );
 
 const PauseIcon = () => (
   <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
-    <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+    <rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" />
   </svg>
 );
 
 const PlayIcon = () => (
   <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
-    <polygon points="5 3 19 12 5 21 5 3"/>
+    <polygon points="5 3 19 12 5 21 5 3" />
   </svg>
 );
 
 
 const Avatar = ({ username, size = 32 }) => {
-  const colors = ['#f09433','#e6683c','#dc2743','#cc2366','#bc1888','#8a3ab9','#4c68d7'];
+  const colors = ['#f09433', '#e6683c', '#dc2743', '#cc2366', '#bc1888', '#8a3ab9', '#4c68d7'];
   const color = colors[username?.charCodeAt(0) % colors.length] || '#ccc';
   return (
     <div style={{
@@ -50,11 +50,11 @@ const Avatar = ({ username, size = 32 }) => {
 
 
 
-export default function StoriesViewer({ 
+export default function StoriesViewer({
   stories, // Array of story groups: [{ user_id, username, stories: [...] }]
   initialUserIndex = 0,
   initialStoryIndex = 0,
-  onClose 
+  onClose
 }) {
   const { user } = useAuth();
   const [currentUserIndex, setCurrentUserIndex] = useState(initialUserIndex);
@@ -67,7 +67,7 @@ export default function StoriesViewer({
   const currentStory = currentUserStories?.stories[currentStoryIndex];
   const totalStories = currentUserStories?.stories.length || 0;
 
- 
+
 
   useEffect(() => {
     if (!currentStory || paused) return;
@@ -95,7 +95,7 @@ export default function StoriesViewer({
     };
   }, [currentUserIndex, currentStoryIndex, paused]);
 
-  
+
 
   const goToNext = () => {
     if (currentStoryIndex < totalStories - 1) {
@@ -145,7 +145,7 @@ export default function StoriesViewer({
     }
   };
 
-  
+
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -187,81 +187,77 @@ export default function StoriesViewer({
 
   return (
     <div style={styles.backdrop}>
-      <div style={styles.container}>
-        
-     
-        <button onClick={onClose} style={styles.closeBtn}>
-          <CloseIcon />
+      {/* Close button - top right of the backdrop */}
+      <button onClick={onClose} style={styles.closeBtn}>
+        <CloseIcon />
+      </button>
+
+      {/* Previous user navigation button */}
+      {currentUserIndex > 0 && (
+        <button onClick={goToPreviousUser} style={{ ...styles.navBtn, left: 20 }}>
+          <ChevronLeft />
         </button>
+      )}
 
-     
-        {currentUserIndex > 0 && (
-          <button onClick={goToPreviousUser} style={{ ...styles.navBtn, left: 20 }}>
-            <ChevronLeft />
-          </button>
-        )}
+      {/* Next user navigation button */}
+      {currentUserIndex < stories.length - 1 && (
+        <button onClick={goToNextUser} style={{ ...styles.navBtn, right: 20 }}>
+          <ChevronRight />
+        </button>
+      )}
 
-
-        {currentUserIndex < stories.length - 1 && (
-          <button onClick={goToNextUser} style={{ ...styles.navBtn, right: 20 }}>
-            <ChevronRight />
-          </button>
-        )}
-
-       
-        <div style={styles.storyCard}>
-          
-         
-          <div style={styles.progressBars}>
-            {currentUserStories.stories.map((_, idx) => (
-              <div key={idx} style={styles.progressBarOuter}>
-                <div
-                  style={{
-                    ...styles.progressBarInner,
-                    width: 
-                      idx < currentStoryIndex ? '100%' :
+      {/* Story Card - phone-shaped, centered */}
+      <div style={styles.storyCard}>
+        {/* Progress bars */}
+        <div style={styles.progressBars}>
+          {currentUserStories.stories.map((_, idx) => (
+            <div key={idx} style={styles.progressBarOuter}>
+              <div
+                style={{
+                  ...styles.progressBarInner,
+                  width:
+                    idx < currentStoryIndex ? '100%' :
                       idx === currentStoryIndex ? `${progress}%` :
-                      '0%'
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-
-        
-          <div style={styles.header}>
-            <Avatar username={currentUserStories.username} size={32} />
-            <div style={{ flex: 1 }}>
-              <div style={styles.username}>{currentUserStories.username}</div>
-              <div style={styles.timeAgo}>{timeAgo(currentStory.created_at)}</div>
+                        '0%'
+                }}
+              />
             </div>
-            <button onClick={() => setPaused(p => !p)} style={styles.pauseBtn}>
-              {paused ? <PlayIcon /> : <PauseIcon />}
-            </button>
-          </div>
-
-          
-          <div
-            style={styles.content}
-            onClick={handleClick}
-          >
-            <img
-              src={currentStory.media_url}
-              alt="story"
-              style={styles.image}
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
-          </div>
-
-     
-          {currentUserStories.user_id === user?.user_id && (
-            <div style={styles.viewCount}>
-              👁 {currentStory.view_count || 0} views
-            </div>
-          )}
+          ))}
         </div>
+
+        {/* Header with avatar, username, time, and pause button */}
+        <div style={styles.header}>
+          <Avatar username={currentUserStories.username} size={32} />
+          <div style={{ flex: 1 }}>
+            <div style={styles.username}>{currentUserStories.username}</div>
+            <div style={styles.timeAgo}>{timeAgo(currentStory.created_at)}</div>
+          </div>
+          <button onClick={() => setPaused(p => !p)} style={styles.pauseBtn}>
+            {paused ? <PlayIcon /> : <PauseIcon />}
+          </button>
+        </div>
+
+        {/* Story content (image) */}
+        <div
+          style={styles.content}
+          onClick={handleClick}
+        >
+          <img
+            src={currentStory.media_url}
+            alt="story"
+            style={styles.image}
+            onError={(e) => {
+              e.target.style.display = 'none';
+            }}
+          />
+        </div>
+
+        {/* View count */}
+        {currentUserStories.user_id === user?.user_id && (
+          <div style={styles.viewCount}>
+            👁 {currentStory.view_count || 0} views
+          </div>
+        )}
       </div>
     </div>
   );
@@ -275,30 +271,27 @@ const styles = {
     backgroundColor: 'rgba(0,0,0,0.9)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
-  container: {
-    position: 'relative',
-    width: '100%', maxWidth: 500,
-    height: '100vh', maxHeight: 900,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-  },
   closeBtn: {
-    position: 'absolute', top: 20, right: 20, zIndex: 2001,
+    position: 'fixed', top: 20, right: 20, zIndex: 2100,
     background: 'none', border: 'none', cursor: 'pointer',
-    padding: 8, opacity: 0.8,
+    padding: 8, opacity: 0.85,
   },
   navBtn: {
-    position: 'absolute', top: '50%', transform: 'translateY(-50%)',
-    zIndex: 2001, background: 'rgba(0,0,0,0.5)', border: 'none',
-    cursor: 'pointer', padding: 12, borderRadius: '50%',
+    position: 'fixed', top: '50%', transform: 'translateY(-50%)',
+    zIndex: 2050, background: 'rgba(255,255,255,0.15)', border: 'none',
+    cursor: 'pointer', padding: 14, borderRadius: '50%',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    opacity: 0.7,
+    backdropFilter: 'blur(4px)', transition: 'background 0.15s',
   },
   storyCard: {
     position: 'relative',
-    width: '100%', height: '100%',
+    width: '100%', maxWidth: 360, // Phone-like width
+    height: '100vh', maxHeight: 640, // Phone-like height
     backgroundColor: '#000',
-    borderRadius: 8, overflow: 'hidden',
+    borderRadius: 12, // Rounded corners for phone look
+    overflow: 'hidden',
     display: 'flex', flexDirection: 'column',
+    boxShadow: '0 0 20px rgba(0,0,0,0.5)', // Add some depth
   },
   progressBars: {
     position: 'absolute', top: 0, left: 0, right: 0,
@@ -327,16 +320,17 @@ const styles = {
   },
   pauseBtn: {
     background: 'none', border: 'none', cursor: 'pointer',
-    padding: 4, opacity: 0,
+    padding: 4, opacity: 0.8, // Make pause button always visible
   },
   content: {
     flex: 1, position: 'relative',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     cursor: 'pointer', userSelect: 'none',
+    width: '100%', height: '100%', // Ensure content fills the card
   },
   image: {
-    maxWidth: '100%', maxHeight: '100%',
-    objectFit: 'contain',
+    width: '100%', height: '100%', // Image fills the content area
+    objectFit: 'cover', // Cover the area, cropping if necessary
   },
   viewCount: {
     position: 'absolute', bottom: 20, left: '50%',

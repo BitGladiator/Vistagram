@@ -112,6 +112,60 @@ const uploadImage = async (req, res, next) => {
   }
 };
 
+// Upload story image (no post_id required)
+const uploadStory = async (req, res, next) => {
+  try {
+    const user_id = req.userId;
+
+    if (!req.file) {
+      return res.status(400).json({
+        status: 'error',
+        error: { code: 'NO_FILE', message: 'No file uploaded' }
+      });
+    }
+
+    const media_id = uuidv4();
+    const fileBuffer = req.file.buffer;
+    const contentType = 'image/jpeg';
+
+    const metadata = await extractMetadata(fileBuffer);
+    const variants = await generateVariants(fileBuffer);
+
+    const basePath = `stories/${user_id}/${media_id}`;
+
+    const [largeUrl, mediumUrl, thumbnailUrl] = await Promise.all([
+      uploadFile(`${basePath}/large.jpg`, variants.large, contentType),
+      uploadFile(`${basePath}/medium.jpg`, variants.medium, contentType),
+      uploadFile(`${basePath}/thumbnail.jpg`, variants.thumbnail, contentType),
+    ]);
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        media: {
+          media_id,
+          media_type: 'image',
+          url: mediumUrl,
+          urls: {
+            large: largeUrl,
+            medium: mediumUrl,
+            thumbnail: thumbnailUrl
+          },
+          metadata: {
+            width: metadata.width,
+            height: metadata.height,
+            file_size: req.file.size
+          }
+        }
+      },
+      meta: { timestamp: new Date().toISOString() }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 // Get presigned URL for direct browser upload
 const getUploadUrl = async (req, res, next) => {
   try {
@@ -213,6 +267,7 @@ const getPostMedia = async (req, res, next) => {
 
 module.exports = {
   uploadImage,
+  uploadStory,
   getUploadUrl,
   getMedia,
   getPostMedia

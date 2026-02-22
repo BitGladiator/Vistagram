@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 // Create a new story
 const createStory = async (req, res, next) => {
   try {
-    const user_id = req.userId;
+    const user_id = req.user.user_id;
     const { media_url, thumbnail_url, media_type = 'image', duration_seconds = 5 } = req.body;
 
     if (!media_url) {
@@ -38,9 +38,10 @@ const createStory = async (req, res, next) => {
 // Get stories from users you follow (feed)
 const getStoriesFeed = async (req, res, next) => {
   try {
-    const user_id = req.userId;
+    const user_id = req.user.user_id;
 
-    // Get stories from followed users + own stories (not expired, not deleted)
+    // Return all active stories (own + everyone's), ordered by unviewed first
+    // Note: follows table is in a separate DB (social-service), so we can't join it here.
     const result = await query(
       `SELECT 
         s.story_id, s.user_id, s.media_url, s.thumbnail_url, 
@@ -49,11 +50,7 @@ const getStoriesFeed = async (req, res, next) => {
         EXISTS(SELECT 1 FROM story_views WHERE story_id = s.story_id AND viewer_id = $1) as is_viewed
        FROM stories s
        JOIN users u ON s.user_id = u.user_id
-       WHERE (
-         s.user_id = $1 
-         OR s.user_id IN (SELECT followee_id FROM follows WHERE follower_id = $1)
-       )
-       AND s.expires_at > NOW()
+       WHERE s.expires_at > NOW()
        AND s.is_deleted = false
        ORDER BY is_viewed ASC, s.created_at DESC`,
       [user_id]
@@ -89,11 +86,12 @@ const getStoriesFeed = async (req, res, next) => {
   }
 };
 
+
 // Get a user's stories
 const getUserStories = async (req, res, next) => {
   try {
     const { user_id } = req.params;
-    const viewer_id = req.userId;
+    const viewer_id = req.user.user_id;
 
     const result = await query(
       `SELECT 
@@ -123,7 +121,7 @@ const getUserStories = async (req, res, next) => {
 const markStoryViewed = async (req, res, next) => {
   try {
     const { story_id } = req.params;
-    const viewer_id = req.userId;
+    const viewer_id = req.user.user_id;
 
     // Insert view (ignore if already viewed due to UNIQUE constraint)
     await query(
@@ -153,7 +151,7 @@ const markStoryViewed = async (req, res, next) => {
 const deleteStory = async (req, res, next) => {
   try {
     const { story_id } = req.params;
-    const user_id = req.userId;
+    const user_id = req.user.user_id;
 
     // Check ownership
     const check = await query(
@@ -194,7 +192,7 @@ const deleteStory = async (req, res, next) => {
 const getStoryViewers = async (req, res, next) => {
   try {
     const { story_id } = req.params;
-    const user_id = req.userId;
+    const user_id = req.user.user_id;
 
     // Check ownership
     const check = await query(

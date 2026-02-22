@@ -24,7 +24,7 @@ api.interceptors.request.use((config) => {
       if (parsed.user_id) {
         config.headers['x-user-id'] = parsed.user_id;
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   return config;
@@ -58,7 +58,7 @@ export const mediaAPI = {
   upload: (formData) => api.post('/api/v1/media/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
-  uploadStory: (formData) => api.post('/api/v1/media/upload', formData, { // Same endpoint
+  uploadStory: (formData) => api.post('/api/v1/media/upload-story', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
 };
@@ -68,7 +68,7 @@ export const postAPI = {
   getFeed: (params) => api.get('/api/v1/feed/home', { params }),
   getExploreFeed: (params) => api.get('/api/v1/feed/explore', { params }),
   getUserPosts: (userId) => api.get(`/api/v1/feed/user/${userId}`),
-  getPost: (postId) => api.get(`/api/v1/posts/${postId}`), 
+  getPost: (postId) => api.get(`/api/v1/posts/${postId}`),
   clearFeedCache: () => api.delete('/api/v1/feed/cache'),
 };
 

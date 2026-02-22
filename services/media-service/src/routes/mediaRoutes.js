@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
   uploadImage,
+  uploadStory,
   getUploadUrl,
   getMedia,
   getPostMedia
@@ -12,8 +13,11 @@ const upload = require('../middleware/upload');
 // All routes require auth
 router.use(authenticateUser);
 
-// Upload image directly
+// Upload post image
 router.post('/upload', upload.single('image'), uploadImage);
+
+// Upload story image (no post_id required)
+router.post('/upload-story', upload.single('image'), uploadStory);
 
 // Get presigned URL for direct upload
 router.post('/upload-url', getUploadUrl);

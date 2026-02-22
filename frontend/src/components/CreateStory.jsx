@@ -7,14 +7,14 @@ import { mediaAPI } from '../services/api';
 
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="#fff" strokeWidth="2">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
 const ImageIcon = () => (
   <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1">
-    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-    <polyline points="21 15 16 10 5 21"/>
+    <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" />
+    <polyline points="21 15 16 10 5 21" />
   </svg>
 );
 
@@ -62,13 +62,17 @@ export default function CreateStory({ onClose, onSuccess }) {
     setError('');
 
     try {
-    
+
       const formData = new FormData();
       formData.append('image', file);
-      formData.append('type', 'story'); // Special flag for stories
 
       const res = await mediaAPI.uploadStory(formData);
-      const media_url = res.data?.data?.media?.urls?.medium || res.data?.data?.url;
+      const media_url =
+        res.data?.data?.media?.url ||
+        res.data?.data?.media?.urls?.medium ||
+        res.data?.data?.url;
+
+      if (!media_url) throw new Error('Failed to get media URL from upload');
 
       // Create story record
       const storyRes = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/stories`, {
@@ -88,6 +92,7 @@ export default function CreateStory({ onClose, onSuccess }) {
 
       if (!storyRes.ok) throw new Error('Failed to create story');
 
+
       if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
@@ -101,8 +106,8 @@ export default function CreateStory({ onClose, onSuccess }) {
   return (
     <div style={styles.backdrop} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div style={styles.modal}>
-        
-      
+
+
         <div style={styles.header}>
           <span style={styles.title}>Create story</span>
           <button onClick={onClose} style={styles.closeBtn}>
@@ -110,7 +115,7 @@ export default function CreateStory({ onClose, onSuccess }) {
           </button>
         </div>
 
-       
+
         {!preview ? (
           // Upload zone
           <div
@@ -138,7 +143,7 @@ export default function CreateStory({ onClose, onSuccess }) {
           // Preview
           <div style={styles.previewContainer}>
             <img src={preview} alt="preview" style={styles.previewImage} />
-            
+
             <div style={styles.previewActions}>
               <button
                 onClick={() => { setFile(null); setPreview(null); }}

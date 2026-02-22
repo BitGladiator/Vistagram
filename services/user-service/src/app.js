@@ -4,6 +4,7 @@ const helmet = require('helmet');
 require('dotenv').config();
 
 const userRoutes = require('./routes/userRoutes');
+const storiesRoutes = require('./routes/storiesRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -38,6 +39,7 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/stories', storiesRoutes);
 
 // 404 handler
 app.use((req, res) => {
