@@ -1091,28 +1091,7 @@ export default function Feed() {
               subtitle={u.subtitle}
             />
           ))}
-          {selectedPostId && (
-            <PostModal
-              postId={selectedPostId}
-              onClose={() => setSelectedPostId(null)}
-            />
-          )}
-          {showStoriesViewer && (
-            <StoriesViewer
-              stories={stories}
-              initialUserIndex={selectedStoryUser}
-              onClose={() => setShowStoriesViewer(false)}
-            />
-          )}
 
-          {showCreateStory && (
-            <CreateStory
-              onClose={() => setShowCreateStory(false)}
-              onSuccess={() => {
-                loadStories();
-              }}
-            />
-          )}
           <div style={{ marginTop: 24 }}>
             <p style={{ fontSize: 11, color: "#c7c7c7", lineHeight: "16px" }}>
               About · Help · Press · API · Jobs · Privacy · Terms · Locations ·
@@ -1124,6 +1103,29 @@ export default function Feed() {
           </div>
         </div>
       </div>
+
+      {/* Modals rendered at root level so position:fixed works correctly */}
+      {selectedPostId && (
+        <PostModal
+          postId={selectedPostId}
+          onClose={() => setSelectedPostId(null)}
+        />
+      )}
+      {showStoriesViewer && (
+        <StoriesViewer
+          stories={stories}
+          initialUserIndex={selectedStoryUser}
+          onClose={() => setShowStoriesViewer(false)}
+        />
+      )}
+      {showCreateStory && (
+        <CreateStory
+          onClose={() => setShowCreateStory(false)}
+          onSuccess={() => {
+            loadStories();
+          }}
+        />
+      )}
     </div>
   );
 }
