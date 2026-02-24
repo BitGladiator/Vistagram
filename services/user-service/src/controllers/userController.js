@@ -100,10 +100,10 @@ const register = async (req, res, next) => {
 const updateProfile = async (req, res, next) => {
   try {
     const { user_id } = req.params;
-    const requestingUserId = req.userId; 
+    const requestingUserId = req.user.user_id;
     const { full_name, bio, is_private } = req.body;
 
-    
+
     if (user_id !== requestingUserId) {
       return res.status(403).json({
         status: 'error',
@@ -114,7 +114,7 @@ const updateProfile = async (req, res, next) => {
       });
     }
 
-  
+
     if (full_name && full_name.trim().length === 0) {
       return res.status(400).json({
         status: 'error',
@@ -158,11 +158,11 @@ const updateProfile = async (req, res, next) => {
       paramCount++;
     }
 
-  
+
     updates.push(`updated_at = NOW()`);
 
     if (updates.length === 1) {
-     
+
       return res.status(400).json({
         status: 'error',
         error: {
@@ -242,7 +242,7 @@ const login = async (req, res, next) => {
 
     const user = result.rows[0];
 
-   
+
     if (!user.is_active) {
       return res.status(403).json({
         status: "error",
@@ -339,5 +339,5 @@ module.exports = {
   register,
   login,
   getProfile,
-  updateProfile,  
+  updateProfile,
 };
