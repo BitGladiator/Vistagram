@@ -8,6 +8,7 @@ import Search from "./pages/Search";
 import Hashtag from './pages/Hashtag'
 import CreatePost from "./pages/CreatePost";
 import Explore from "./pages/Explore";
+import EditProfile from './pages/EditProfile'
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth(); // Use the useAuth hook
@@ -89,6 +90,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/accounts/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
       <Route path="/hashtag/:tag" element={<ProtectedRoute><Hashtag /></ProtectedRoute>} />
     </Routes>
   );

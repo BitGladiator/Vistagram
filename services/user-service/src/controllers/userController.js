@@ -97,6 +97,115 @@ const register = async (req, res, next) => {
     next(error);
   }
 };
+const updateProfile = async (req, res, next) => {
+  try {
+    const { user_id } = req.params;
+    const requestingUserId = req.userId; 
+    const { full_name, bio, is_private } = req.body;
+
+    
+    if (user_id !== requestingUserId) {
+      return res.status(403).json({
+        status: 'error',
+        error: {
+          code: 'FORBIDDEN',
+          message: 'You can only edit your own profile'
+        }
+      });
+    }
+
+  
+    if (full_name && full_name.trim().length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Full name cannot be empty'
+        }
+      });
+    }
+
+    if (bio && bio.length > 150) {
+      return res.status(400).json({
+        status: 'error',
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Bio must be 150 characters or less'
+        }
+      });
+    }
+
+
+    const updates = [];
+    const values = [];
+    let paramCount = 1;
+
+    if (full_name !== undefined) {
+      updates.push(`full_name = $${paramCount}`);
+      values.push(full_name.trim());
+      paramCount++;
+    }
+
+    if (bio !== undefined) {
+      updates.push(`bio = $${paramCount}`);
+      values.push(bio.trim());
+      paramCount++;
+    }
+
+    if (is_private !== undefined) {
+      updates.push(`is_private = $${paramCount}`);
+      values.push(is_private);
+      paramCount++;
+    }
+
+  
+    updates.push(`updated_at = NOW()`);
+
+    if (updates.length === 1) {
+     
+      return res.status(400).json({
+        status: 'error',
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'No fields to update'
+        }
+      });
+    }
+
+    values.push(user_id);
+
+    const result = await query(
+      `UPDATE users 
+       SET ${updates.join(', ')}
+       WHERE user_id = $${paramCount}
+       RETURNING user_id, username, email, full_name, bio, is_private, is_verified, 
+                 follower_count, following_count, post_count, created_at, updated_at`,
+      values
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user: result.rows[0]
+      },
+      meta: {
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // Login user
 const login = async (req, res, next) => {
@@ -133,7 +242,7 @@ const login = async (req, res, next) => {
 
     const user = result.rows[0];
 
-    // Check if account is active
+   
     if (!user.is_active) {
       return res.status(403).json({
         status: "error",
@@ -230,4 +339,5 @@ module.exports = {
   register,
   login,
   getProfile,
+  updateProfile,  
 };
