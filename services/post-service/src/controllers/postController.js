@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
 
 const FEED_SERVICE_URL = process.env.FEED_SERVICE_URL || 'http://feed-service:3004';
+const SOCIAL_SERVICE_URL = process.env.SOCIAL_SERVICE_URL || 'http://social-service:3002';
 
 // Helper function to clear feed cache
 const clearFeedCache = async (userId) => {
@@ -114,6 +115,20 @@ const getPost = async (req, res, next) => {
     );
 
     post.media = mediaResult.rows;
+
+    // Check if liked by user
+    let is_liked = false;
+    if (req.userId) {
+      try {
+        const likeRes = await axios.get(`${SOCIAL_SERVICE_URL}/api/v1/likes/${post_id}/check`, {
+          headers: { 'x-user-id': req.userId }
+        });
+        is_liked = likeRes.data?.data?.is_liked || false;
+      } catch (err) {
+        console.error(`Failed to check like status for post ${post_id}`, err.message);
+      }
+    }
+    post.is_liked = is_liked;
 
     res.status(200).json({
       status: 'success',

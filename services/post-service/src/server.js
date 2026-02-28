@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const postRoutes = require('./routes/postRoutes');
 const errorHandler = require('./middleware/errorHandler');
+const rabbitmq = require('./config/rabbitmq');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -51,12 +52,15 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`
 Post Service running on port ${PORT}
 Environment: ${process.env.NODE_ENV}
 Health check: http://localhost:${PORT}/health
   `);
+
+  // Connect to RabbitMQ
+  await rabbitmq.connect();
 });
 
 // Graceful shutdown

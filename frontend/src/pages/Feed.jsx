@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { postAPI, socialAPI, storiesAPI } from "../services/api";
+import { postAPI, socialAPI, storiesAPI, userAPI } from "../services/api";
 import PostModal from "../components/PostModal";
 import CreateStory from "../components/CreateStory";
 import StoriesViewer from "../components/StoriesViewer";
@@ -574,8 +574,30 @@ const PostCard = ({ post, onLike, onPostClick }) => {
   );
 };
 
-const SuggestedUser = ({ username, subtitle }) => {
+const SuggestedUser = ({ user_id, username, subtitle, onFollowed }) => {
   const [following, setFollowing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleFollow = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      if (following) {
+        await socialAPI.unfollow(user_id);
+        setFollowing(false);
+      } else {
+        await socialAPI.follow(user_id);
+        setFollowing(true);
+        // Remove from suggestions after a short delay so user sees the state change
+        setTimeout(() => onFollowed?.(user_id), 800);
+      }
+    } catch (e) {
+      console.error('Follow/unfollow failed:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div
       style={{
@@ -612,15 +634,17 @@ const SuggestedUser = ({ username, subtitle }) => {
         </div>
       </div>
       <button
-        onClick={() => setFollowing(!following)}
+        onClick={handleFollow}
+        disabled={loading}
         style={{
           background: "none",
           border: "none",
-          cursor: "pointer",
+          cursor: loading ? "default" : "pointer",
           color: following ? "#262626" : "#0095f6",
           fontSize: 13,
           fontWeight: "600",
           flexShrink: 0,
+          opacity: loading ? 0.6 : 1,
         }}
       >
         {following ? "Following" : "Follow"}
@@ -643,22 +667,8 @@ export default function Feed() {
   const [showCreateStory, setShowCreateStory] = useState(false);
   const [selectedStoryUser, setSelectedStoryUser] = useState(0);
 
-  const storyUsers = [
-    "bob",
-    "charlie",
-    "diana",
-    "eve",
-    "frank",
-    "grace",
-    "henry",
-  ];
-  const suggestedUsers = [
-    { username: "photography_lover", subtitle: "Suggested for you" },
-    { username: "travel_diary", subtitle: "Follows you" },
-    { username: "food_vibes", subtitle: "Suggested for you" },
-    { username: "street_art_daily", subtitle: "New to Vistagram" },
-    { username: "nature_snaps", subtitle: "Suggested for you" },
-  ];
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(true);
 
   const loadPosts = useCallback(async (pageNum = 0) => {
     try {
@@ -687,10 +697,23 @@ export default function Feed() {
     }
   }, []);
 
+  const loadSuggestedUsers = useCallback(async () => {
+    try {
+      setSuggestionsLoading(true);
+      const res = await userAPI.getSuggested();
+      setSuggestedUsers(res.data?.data?.suggested_users || []);
+    } catch (err) {
+      console.error('Failed to load suggested users:', err);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadPosts(0);
     loadStories();
-  }, [loadPosts, loadStories]);
+    loadSuggestedUsers();
+  }, [loadPosts, loadStories, loadSuggestedUsers]);
 
   return (
     <div style={{ backgroundColor: "#fafafa", minHeight: "100vh" }}>
@@ -1084,13 +1107,33 @@ export default function Feed() {
             </button>
           </div>
 
-          {suggestedUsers.map((u) => (
-            <SuggestedUser
-              key={u.username}
-              username={u.username}
-              subtitle={u.subtitle}
-            />
-          ))}
+          {suggestionsLoading ? (
+            [1, 2, 3, 4, 5].map((i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <div className="shimmer" style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <div className="shimmer" style={{ width: '60%', height: 12, borderRadius: 4, marginBottom: 4 }} />
+                  <div className="shimmer" style={{ width: '80%', height: 10, borderRadius: 4 }} />
+                </div>
+              </div>
+            ))
+          ) : suggestedUsers.length === 0 ? (
+            <div style={{ fontSize: 13, color: '#8e8e8e', textAlign: 'center', padding: '12px 0' }}>
+              No suggestions right now
+            </div>
+          ) : (
+            suggestedUsers.map((u) => (
+              <SuggestedUser
+                key={u.user_id}
+                user_id={u.user_id}
+                username={u.username}
+                subtitle={u.subtitle}
+                onFollowed={(followedId) =>
+                  setSuggestedUsers((prev) => prev.filter((s) => s.user_id !== followedId))
+                }
+              />
+            ))
+          )}
 
           <div style={{ marginTop: 24 }}>
             <p style={{ fontSize: 11, color: "#c7c7c7", lineHeight: "16px" }}>

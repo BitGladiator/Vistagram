@@ -54,6 +54,7 @@ export const authAPI = {
 export const userAPI = {
   getProfile: (userId) => api.get(`/api/v1/users/${userId}`),
   updateProfile: (userId, data) => api.put(`/api/v1/users/${userId}`, data),
+  getSuggested: () => api.get('/api/v1/users/suggested'),
 };
 export const mediaAPI = {
   upload: (formData) => api.post('/api/v1/media/upload', formData, {

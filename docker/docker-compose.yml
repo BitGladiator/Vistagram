@@ -68,6 +68,8 @@ services:
       - DB_NAME=${POST_SERVICE_DB_NAME}
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      - SOCIAL_SERVICE_URL=http://social-service:3003
     networks:
       - vistagram-network
     depends_on:

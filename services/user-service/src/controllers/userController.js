@@ -335,9 +335,62 @@ const getProfile = async (req, res, next) => {
   }
 };
 
+// Get suggested users (users the current user doesn't follow)
+const getSuggestedUsers = async (req, res, next) => {
+  try {
+    const currentUserId = req.user.user_id;
+
+    const result = await query(
+      `SELECT u.user_id, u.username, u.full_name, u.is_verified, u.created_at,
+              EXISTS(
+                SELECT 1 FROM follows f2
+                WHERE f2.follower_id = u.user_id AND f2.followee_id = $1
+              ) AS follows_you
+       FROM users u
+       WHERE u.is_active = true
+         AND u.user_id != $1
+         AND NOT EXISTS (
+           SELECT 1 FROM follows f
+           WHERE f.follower_id = $1 AND f.followee_id = u.user_id
+         )
+       ORDER BY u.follower_count DESC
+       LIMIT 5`,
+      [currentUserId]
+    );
+
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const suggestedUsers = result.rows.map((u) => {
+      let subtitle = 'Suggested for you';
+      if (u.follows_you) {
+        subtitle = 'Follows you';
+      } else if (new Date(u.created_at) > sevenDaysAgo) {
+        subtitle = 'New to Vistagram';
+      }
+      return {
+        user_id: u.user_id,
+        username: u.username,
+        full_name: u.full_name,
+        is_verified: u.is_verified,
+        subtitle,
+      };
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: { suggested_users: suggestedUsers },
+      meta: { timestamp: new Date().toISOString() },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
   getProfile,
   updateProfile,
+  getSuggestedUsers,
 };
