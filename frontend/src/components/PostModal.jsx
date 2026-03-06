@@ -61,7 +61,7 @@ const Avatar = ({ username, size = 32 }) => {
   );
 };
 
-// ── Comment Item ──────────────────────────────────────────────────────────────
+
 
 const CommentItem = ({ comment }) => {
   const timeAgo = (date) => {
@@ -111,7 +111,7 @@ const OptionsSheet = ({ onEdit, onDelete, onClose }) => (
         backgroundColor: 'rgba(0,0,0,0.5)',
       }}
     />
-    {/* Sheet */}
+
     <div style={{
       position: 'fixed', left: '50%', top: '50%',
       transform: 'translate(-50%, -50%)',
@@ -123,14 +123,14 @@ const OptionsSheet = ({ onEdit, onDelete, onClose }) => (
         onClick={onEdit}
         style={sheetBtnStyle}
       >
-        ✏️ Edit
+        Edit
       </button>
       <div style={{ height: 1, backgroundColor: '#efefef' }} />
       <button
         onClick={onDelete}
         style={{ ...sheetBtnStyle, color: '#ed4956', fontWeight: '600' }}
       >
-        🗑️ Delete
+        Delete
       </button>
       <div style={{ height: 1, backgroundColor: '#efefef' }} />
       <button onClick={onClose} style={{ ...sheetBtnStyle, color: '#8e8e8e' }}>
@@ -140,7 +140,7 @@ const OptionsSheet = ({ onEdit, onDelete, onClose }) => (
   </>
 );
 
-// ── Delete Confirmation ───────────────────────────────────────────────────────
+
 
 const DeleteConfirm = ({ onConfirm, onCancel, deleting }) => (
   <>
@@ -197,7 +197,7 @@ const DeleteConfirm = ({ onConfirm, onCancel, deleting }) => (
   </>
 );
 
-// ── Edit Form ─────────────────────────────────────────────────────────────────
+
 
 const EditForm = ({ post, onSave, onCancel }) => {
   const [caption, setCaption] = useState(post.caption || '');
@@ -289,7 +289,7 @@ const sheetBtnStyle = {
   fontSize: 14, color: '#262626', textAlign: 'left',
 };
 
-// ── Main PostModal ────────────────────────────────────────────────────────────
+
 
 export default function PostModal({ postId, onClose, onDeleted, onUpdated }) {
   const { user } = useAuth();
@@ -301,7 +301,7 @@ export default function PostModal({ postId, onClose, onDeleted, onUpdated }) {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Options sheet / edit / delete state
+  
   const [showOptions, setShowOptions] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -425,7 +425,7 @@ export default function PostModal({ postId, onClose, onDeleted, onUpdated }) {
         </button>
 
         <div style={styles.modal}>
-          {/* Left — image */}
+       
           <div style={styles.leftPanel}>
             {post.media?.[0]?.media_url || post.media_url ? (
               <img
@@ -441,9 +441,9 @@ export default function PostModal({ postId, onClose, onDeleted, onUpdated }) {
             )}
           </div>
 
-          {/* Right — details */}
+         
           <div style={styles.rightPanel}>
-            {/* Header */}
+  
             <div style={styles.header}>
               <Avatar username={post.username || user?.username} size={32} />
               <div style={{ flex: 1 }}>
@@ -461,7 +461,7 @@ export default function PostModal({ postId, onClose, onDeleted, onUpdated }) {
               )}
             </div>
 
-            {/* Comments section (with relative positioning for edit overlay) */}
+         
             <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
               <div style={styles.commentsSection}>
                 {post.caption && (
@@ -494,7 +494,7 @@ export default function PostModal({ postId, onClose, onDeleted, onUpdated }) {
                 ))}
               </div>
 
-              {/* Edit form overlaid inside the right panel */}
+           
               {showEdit && (
                 <EditForm
                   post={post}
@@ -504,7 +504,7 @@ export default function PostModal({ postId, onClose, onDeleted, onUpdated }) {
               )}
             </div>
 
-            {/* Actions */}
+        
             <div style={styles.actions}>
               <div style={styles.actionButtons}>
                 <button onClick={handleLike} style={styles.actionBtn}>
@@ -528,7 +528,7 @@ export default function PostModal({ postId, onClose, onDeleted, onUpdated }) {
               </div>
             </div>
 
-            {/* Comment form */}
+          
             <form onSubmit={handleComment} style={styles.commentForm}>
               <button type="button" style={styles.emojiBtn}><EmojiIcon /></button>
               <input
@@ -545,7 +545,7 @@ export default function PostModal({ postId, onClose, onDeleted, onUpdated }) {
         </div>
       </div>
 
-      {/* Options sheet (rendered outside modal backdrop to avoid z-index issues) */}
+     
       {showOptions && (
         <OptionsSheet
           onEdit={() => { setShowOptions(false); setShowEdit(true); }}
@@ -554,7 +554,7 @@ export default function PostModal({ postId, onClose, onDeleted, onUpdated }) {
         />
       )}
 
-      {/* Delete confirmation */}
+    
       {showDeleteConfirm && (
         <DeleteConfirm
           onConfirm={handleDelete}
