@@ -6,9 +6,9 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
 
-# ========================
+
 # TEST STAGE
-# ========================
+
 
 test:user-service:
   image: node:18-alpine
@@ -43,7 +43,7 @@ test:user-service:
       done
     # Create test database
     - psql -h postgres -U vistagram -c "CREATE DATABASE vistagram_users_test;"
-    # Run test schema (no \c command)
+    # Run test schema
     - psql -h postgres -U vistagram -d vistagram_users_test -f ../../databases/postgres/schemas/02_users_schema_test.sql
   script:
     - npm test
@@ -52,9 +52,9 @@ test:user-service:
     - develop
     - merge_requests
 
-# ========================
+
 # BUILD STAGE
-# ========================
+
 
 build:user-service:
   image: docker:24
