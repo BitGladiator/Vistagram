@@ -67,6 +67,8 @@ export const mediaAPI = {
 // Posts
 export const postAPI = {
   create: (data) => api.post('/api/v1/posts', data),
+  update: (postId, data) => api.put(`/api/v1/posts/${postId}`, data),
+  delete: (postId) => api.delete(`/api/v1/posts/${postId}`),
   getFeed: (params) => api.get('/api/v1/feed/home', { params }),
   getExploreFeed: (params) => api.get('/api/v1/feed/explore', { params }),
   getUserPosts: (userId) => api.get(`/api/v1/feed/user/${userId}`),

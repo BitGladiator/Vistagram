@@ -1,55 +1,53 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { postAPI, socialAPI } from '../services/api';
 
 
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="#fff" strokeWidth="2">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
 const HeartIcon = ({ filled, size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? '#ed4956' : 'none'} stroke={filled ? '#ed4956' : '#262626'} strokeWidth="2">
-    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
   </svg>
 );
 
 const CommentIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2">
-    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
   </svg>
 );
 
 const ShareIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2">
-    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
   </svg>
 );
 
 const SaveIcon = ({ filled }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill={filled ? '#262626' : 'none'} stroke="#262626" strokeWidth="2">
-    <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+    <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
   </svg>
 );
 
 const MoreIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="#262626">
-    <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+    <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
   </svg>
 );
 
 const EmojiIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-    <line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+    <circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" />
+    <line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" />
   </svg>
 );
 
-
-
 const Avatar = ({ username, size = 32 }) => {
-  const colors = ['#f09433','#e6683c','#dc2743','#cc2366','#bc1888','#8a3ab9','#4c68d7'];
+  const colors = ['#f09433', '#e6683c', '#dc2743', '#cc2366', '#bc1888', '#8a3ab9', '#4c68d7'];
   const color = colors[username?.charCodeAt(0) % colors.length] || '#ccc';
   return (
     <div style={{
@@ -101,7 +99,199 @@ const CommentItem = ({ comment }) => {
   );
 };
 
-export default function PostModal({ postId, onClose }) {
+// ── Options Sheet ─────────────────────────────────────────────────────────────
+
+const OptionsSheet = ({ onEdit, onDelete, onClose }) => (
+  <>
+    {/* Backdrop */}
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1100,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+      }}
+    />
+    {/* Sheet */}
+    <div style={{
+      position: 'fixed', left: '50%', top: '50%',
+      transform: 'translate(-50%, -50%)',
+      zIndex: 1101, backgroundColor: '#fff',
+      borderRadius: 12, overflow: 'hidden',
+      width: 260, boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+    }}>
+      <button
+        onClick={onEdit}
+        style={sheetBtnStyle}
+      >
+        ✏️ Edit
+      </button>
+      <div style={{ height: 1, backgroundColor: '#efefef' }} />
+      <button
+        onClick={onDelete}
+        style={{ ...sheetBtnStyle, color: '#ed4956', fontWeight: '600' }}
+      >
+        🗑️ Delete
+      </button>
+      <div style={{ height: 1, backgroundColor: '#efefef' }} />
+      <button onClick={onClose} style={{ ...sheetBtnStyle, color: '#8e8e8e' }}>
+        Cancel
+      </button>
+    </div>
+  </>
+);
+
+// ── Delete Confirmation ───────────────────────────────────────────────────────
+
+const DeleteConfirm = ({ onConfirm, onCancel, deleting }) => (
+  <>
+    <div
+      onClick={!deleting ? onCancel : undefined}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1200,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+      }}
+    />
+    <div style={{
+      position: 'fixed', left: '50%', top: '50%',
+      transform: 'translate(-50%, -50%)',
+      zIndex: 1201, backgroundColor: '#fff',
+      borderRadius: 12, overflow: 'hidden',
+      width: 300, boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+      textAlign: 'center',
+    }}>
+      <div style={{ padding: '24px 20px 16px' }}>
+        <div style={{ fontSize: 22, marginBottom: 8 }}>🗑️</div>
+        <h3 style={{ fontSize: 18, fontWeight: '600', color: '#262626', margin: '0 0 8px' }}>
+          Delete Post?
+        </h3>
+        <p style={{ fontSize: 14, color: '#8e8e8e', margin: 0 }}>
+          This action cannot be undone.
+        </p>
+      </div>
+      <div style={{ height: 1, backgroundColor: '#efefef' }} />
+      <button
+        onClick={onConfirm}
+        disabled={deleting}
+        style={{
+          display: 'block', width: '100%', padding: '14px 20px',
+          background: 'none', border: 'none', cursor: deleting ? 'default' : 'pointer',
+          fontSize: 14, fontWeight: '600', color: '#ed4956',
+          opacity: deleting ? 0.5 : 1,
+        }}
+      >
+        {deleting ? 'Deleting…' : 'Delete'}
+      </button>
+      <div style={{ height: 1, backgroundColor: '#efefef' }} />
+      <button
+        onClick={onCancel}
+        disabled={deleting}
+        style={{
+          display: 'block', width: '100%', padding: '14px 20px',
+          background: 'none', border: 'none', cursor: deleting ? 'default' : 'pointer',
+          fontSize: 14, color: '#262626',
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+  </>
+);
+
+// ── Edit Form ─────────────────────────────────────────────────────────────────
+
+const EditForm = ({ post, onSave, onCancel }) => {
+  const [caption, setCaption] = useState(post.caption || '');
+  const [location, setLocation] = useState(post.location || '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSave = async () => {
+    if (!caption.trim()) { setError('Caption cannot be empty.'); return; }
+    setSaving(true);
+    setError('');
+    try {
+      const res = await postAPI.update(post.post_id, { caption: caption.trim(), location: location.trim() || null });
+      const updated = res.data?.data?.post || res.data?.post;
+      onSave({ caption: updated?.caption ?? caption.trim(), location: updated?.location ?? location.trim() });
+    } catch (err) {
+      setError(err.response?.data?.error?.message || 'Failed to save. Please try again.');
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, backgroundColor: '#fff',
+      zIndex: 10, display: 'flex', flexDirection: 'column', padding: 20,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <button onClick={onCancel} style={ghostBtn}>Cancel</button>
+        <span style={{ fontSize: 16, fontWeight: '600', color: '#262626' }}>Edit post</span>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          style={{ ...ghostBtn, color: '#0095f6', opacity: saving ? 0.5 : 1 }}
+        >
+          {saving ? 'Saving…' : 'Save'}
+        </button>
+      </div>
+
+      <label style={labelStyle}>Caption</label>
+      <textarea
+        value={caption}
+        onChange={(e) => setCaption(e.target.value)}
+        maxLength={2200}
+        rows={5}
+        style={textareaStyle}
+        placeholder="Write a caption…"
+      />
+      <div style={{ fontSize: 12, color: '#8e8e8e', textAlign: 'right', marginBottom: 16 }}>
+        {caption.length}/2200
+      </div>
+
+      <label style={labelStyle}>Location</label>
+      <input
+        value={location}
+        onChange={(e) => setLocation(e.target.value)}
+        placeholder="Add location"
+        style={inputStyle}
+      />
+
+      {error && (
+        <p style={{ marginTop: 12, color: '#ed4956', fontSize: 13 }}>{error}</p>
+      )}
+    </div>
+  );
+};
+
+const ghostBtn = {
+  background: 'none', border: 'none', cursor: 'pointer',
+  fontSize: 14, fontWeight: '600', color: '#262626', padding: 0,
+};
+const labelStyle = {
+  fontSize: 12, fontWeight: '600', color: '#8e8e8e',
+  textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 6,
+};
+const textareaStyle = {
+  width: '100%', border: '1px solid #dbdbdb', borderRadius: 6,
+  padding: '10px 12px', fontSize: 14, color: '#262626',
+  resize: 'none', outline: 'none', fontFamily: 'inherit',
+  boxSizing: 'border-box',
+};
+const inputStyle = {
+  width: '100%', border: '1px solid #dbdbdb', borderRadius: 6,
+  padding: '10px 12px', fontSize: 14, color: '#262626',
+  outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
+};
+const sheetBtnStyle = {
+  display: 'block', width: '100%', padding: '14px 20px',
+  background: 'none', border: 'none', cursor: 'pointer',
+  fontSize: 14, color: '#262626', textAlign: 'left',
+};
+
+// ── Main PostModal ────────────────────────────────────────────────────────────
+
+export default function PostModal({ postId, onClose, onDeleted, onUpdated }) {
   const { user } = useAuth();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -111,9 +301,14 @@ export default function PostModal({ postId, onClose }) {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Options sheet / edit / delete state
+  const [showOptions, setShowOptions] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     loadPost();
-    // Prevent body scroll when modal is open
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = 'unset'; };
   }, [postId]);
@@ -126,7 +321,6 @@ export default function PostModal({ postId, onClose }) {
       setPost(postData);
       setLiked(postData.is_liked || false);
       setLikeCount(postData.like_count || 0);
-      // Mock comments for now - replace with real API call
       setComments([]);
     } catch (err) {
       console.error('Failed to load post:', err);
@@ -154,10 +348,29 @@ export default function PostModal({ postId, onClose }) {
     try {
       await socialAPI.comment(postId, { content: newComment.trim() });
       setNewComment('');
-      loadPost(); 
+      loadPost();
     } catch (err) {
       console.error('Failed to comment:', err);
     }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await postAPI.delete(postId);
+      onDeleted?.(postId);
+      onClose();
+    } catch (err) {
+      console.error('Failed to delete post:', err);
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleEditSave = ({ caption, location }) => {
+    setPost(p => ({ ...p, caption, location }));
+    setShowEdit(false);
+    onUpdated?.(postId, { caption, location });
   };
 
   const timeAgo = (date) => {
@@ -178,17 +391,17 @@ export default function PostModal({ postId, onClose }) {
   ];
   const gradient = gradients[postId?.charCodeAt(0) % gradients.length] || gradients[0];
 
- 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
 
-  
   useEffect(() => {
     const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, [onClose]);
+
+  const isOwner = post && user && post.user_id === user.user_id;
 
   if (loading) {
     return (
@@ -205,118 +418,151 @@ export default function PostModal({ postId, onClose }) {
   if (!post) return null;
 
   return (
-    <div style={styles.backdrop} onClick={handleBackdropClick}>
+    <>
+      <div style={styles.backdrop} onClick={handleBackdropClick}>
+        <button onClick={onClose} style={styles.closeBtn}>
+          <CloseIcon />
+        </button>
 
-      <button onClick={onClose} style={styles.closeBtn}>
-        <CloseIcon />
-      </button>
-
-     
-      <div style={styles.modal}>
-       
-        <div style={styles.leftPanel}>
-          {post.media?.[0]?.media_url || post.media_url ? (
-            <img
-              src={post.media?.[0]?.media_url || post.media_url}
-              alt="post"
-              style={styles.image}
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-          ) : (
-            <div style={{ ...styles.imagePlaceholder, background: gradient }}>
-              <span style={{ fontSize: 64, opacity: 0.5 }}>📸</span>
-            </div>
-          )}
-        </div>
-
-        
-        <div style={styles.rightPanel}>
-          
-          <div style={styles.header}>
-            <Avatar username={post.username || user?.username} size={32} />
-            <div style={{ flex: 1 }}>
-              <div style={styles.headerUsername}>{post.username || user?.username}</div>
-              {post.location && <div style={styles.headerLocation}>{post.location}</div>}
-            </div>
-            <button style={styles.moreBtn}><MoreIcon /></button>
+        <div style={styles.modal}>
+          {/* Left — image */}
+          <div style={styles.leftPanel}>
+            {post.media?.[0]?.media_url || post.media_url ? (
+              <img
+                src={post.media?.[0]?.media_url || post.media_url}
+                alt="post"
+                style={styles.image}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            ) : (
+              <div style={{ ...styles.imagePlaceholder, background: gradient }}>
+                <span style={{ fontSize: 64, opacity: 0.5 }}>📸</span>
+              </div>
+            )}
           </div>
 
-        
-          <div style={styles.commentsSection}>
-        
-            {post.caption && (
-              <div style={styles.comment}>
-                <Avatar username={post.username || user?.username} size={32} />
-                <div style={{ flex: 1 }}>
-                  <p style={styles.commentText}>
-                    <span style={styles.commentUsername}>{post.username || user?.username}</span>
-                    {' '}{post.caption}
-                  </p>
-                  <div style={styles.commentMeta}>
-                    <span>{timeAgo(post.created_at)}</span>
+          {/* Right — details */}
+          <div style={styles.rightPanel}>
+            {/* Header */}
+            <div style={styles.header}>
+              <Avatar username={post.username || user?.username} size={32} />
+              <div style={{ flex: 1 }}>
+                <div style={styles.headerUsername}>{post.username || user?.username}</div>
+                {post.location && <div style={styles.headerLocation}>{post.location}</div>}
+              </div>
+              {isOwner && (
+                <button
+                  style={styles.moreBtn}
+                  onClick={(e) => { e.stopPropagation(); setShowOptions(true); }}
+                  title="More options"
+                >
+                  <MoreIcon />
+                </button>
+              )}
+            </div>
+
+            {/* Comments section (with relative positioning for edit overlay) */}
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+              <div style={styles.commentsSection}>
+                {post.caption && (
+                  <div style={styles.comment}>
+                    <Avatar username={post.username || user?.username} size={32} />
+                    <div style={{ flex: 1 }}>
+                      <p style={styles.commentText}>
+                        <span style={styles.commentUsername}>{post.username || user?.username}</span>
+                        {' '}{post.caption}
+                      </p>
+                      <div style={styles.commentMeta}>
+                        <span>{timeAgo(post.created_at)}</span>
+                      </div>
+                    </div>
                   </div>
+                )}
+
+                {comments.length === 0 && !post.caption && (
+                  <div style={styles.noComments}>
+                    <h3 style={{ fontSize: 22, fontWeight: '600', color: '#262626', marginBottom: 8 }}>
+                      No comments yet.
+                    </h3>
+                    <p style={{ fontSize: 14, color: '#8e8e8e' }}>
+                      Start the conversation.
+                    </p>
+                  </div>
+                )}
+                {comments.map(comment => (
+                  <CommentItem key={comment.comment_id} comment={comment} />
+                ))}
+              </div>
+
+              {/* Edit form overlaid inside the right panel */}
+              {showEdit && (
+                <EditForm
+                  post={post}
+                  onSave={handleEditSave}
+                  onCancel={() => setShowEdit(false)}
+                />
+              )}
+            </div>
+
+            {/* Actions */}
+            <div style={styles.actions}>
+              <div style={styles.actionButtons}>
+                <button onClick={handleLike} style={styles.actionBtn}>
+                  <HeartIcon filled={liked} />
+                </button>
+                <button style={styles.actionBtn}><CommentIcon /></button>
+                <button style={styles.actionBtn}><ShareIcon /></button>
+                <button onClick={() => setSaved(!saved)} style={{ ...styles.actionBtn, marginLeft: 'auto' }}>
+                  <SaveIcon filled={saved} />
+                </button>
+              </div>
+
+              {likeCount > 0 && (
+                <div style={styles.likes}>
+                  {likeCount.toLocaleString()} {likeCount === 1 ? 'like' : 'likes'}
                 </div>
-              </div>
-            )}
+              )}
 
-       
-            {comments.length === 0 && !post.caption && (
-              <div style={styles.noComments}>
-                <h3 style={{ fontSize: 22, fontWeight: '600', color: '#262626', marginBottom: 8 }}>
-                  No comments yet.
-                </h3>
-                <p style={{ fontSize: 14, color: '#8e8e8e' }}>
-                  Start the conversation.
-                </p>
+              <div style={styles.timestamp}>
+                {timeAgo(post.created_at).toUpperCase()}
               </div>
-            )}
-            {comments.map(comment => (
-              <CommentItem key={comment.comment_id} comment={comment} />
-            ))}
-          </div>
-
-         
-          <div style={styles.actions}>
-            <div style={styles.actionButtons}>
-              <button onClick={handleLike} style={styles.actionBtn}>
-                <HeartIcon filled={liked} />
-              </button>
-              <button style={styles.actionBtn}><CommentIcon /></button>
-              <button style={styles.actionBtn}><ShareIcon /></button>
-              <button onClick={() => setSaved(!saved)} style={{ ...styles.actionBtn, marginLeft: 'auto' }}>
-                <SaveIcon filled={saved} />
-              </button>
             </div>
 
-          
-            {likeCount > 0 && (
-              <div style={styles.likes}>
-                {likeCount.toLocaleString()} {likeCount === 1 ? 'like' : 'likes'}
-              </div>
-            )}
-
-        
-            <div style={styles.timestamp}>
-              {timeAgo(post.created_at).toUpperCase()}
-            </div>
+            {/* Comment form */}
+            <form onSubmit={handleComment} style={styles.commentForm}>
+              <button type="button" style={styles.emojiBtn}><EmojiIcon /></button>
+              <input
+                placeholder="Add a comment..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                style={styles.commentInput}
+              />
+              {newComment.trim() && (
+                <button type="submit" style={styles.postBtn}>Post</button>
+              )}
+            </form>
           </div>
-
-       
-          <form onSubmit={handleComment} style={styles.commentForm}>
-            <button type="button" style={styles.emojiBtn}><EmojiIcon /></button>
-            <input
-              placeholder="Add a comment..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              style={styles.commentInput}
-            />
-            {newComment.trim() && (
-              <button type="submit" style={styles.postBtn}>Post</button>
-            )}
-          </form>
         </div>
       </div>
-    </div>
+
+      {/* Options sheet (rendered outside modal backdrop to avoid z-index issues) */}
+      {showOptions && (
+        <OptionsSheet
+          onEdit={() => { setShowOptions(false); setShowEdit(true); }}
+          onDelete={() => { setShowOptions(false); setShowDeleteConfirm(true); }}
+          onClose={() => setShowOptions(false)}
+        />
+      )}
+
+      {/* Delete confirmation */}
+      {showDeleteConfirm && (
+        <DeleteConfirm
+          onConfirm={handleDelete}
+          onCancel={() => setShowDeleteConfirm(false)}
+          deleting={deleting}
+        />
+      )}
+    </>
   );
 }
 
@@ -368,7 +614,7 @@ const styles = {
     background: 'none', border: 'none', cursor: 'pointer', padding: 8,
   },
   commentsSection: {
-    flex: 1, overflowY: 'auto', padding: 16,
+    flex: 1, overflowY: 'auto', padding: 16, height: '100%',
   },
   comment: {
     display: 'flex', gap: 12, marginBottom: 16,

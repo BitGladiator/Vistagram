@@ -658,6 +658,16 @@ export default function Profile() {
         <PostModal
           postId={selectedPostId}
           onClose={() => setSelectedPostId(null)}
+          onDeleted={(pid) => {
+            setPosts((prev) => prev.filter((p) => p.post_id !== pid));
+            setStats((s) => ({ ...s, posts: Math.max(0, s.posts - 1) }));
+            setSelectedPostId(null);
+          }}
+          onUpdated={(pid, data) => {
+            setPosts((prev) =>
+              prev.map((p) => p.post_id === pid ? { ...p, ...data } : p)
+            );
+          }}
         />
       )}
     </div>

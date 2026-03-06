@@ -236,7 +236,7 @@ const StoryItem = ({ username, isOwn = false, onClick }) => (
   </div>
 );
 
-const PostCard = ({ post, onLike, onPostClick }) => {
+const PostCard = ({ post, onLike, onPostClick, currentUserId, onDelete, onEdit }) => {
   const [liked, setLiked] = useState(post.is_liked || false);
   const [likeCount, setLikeCount] = useState(post.like_count || 0);
   const [saved, setSaved] = useState(false);
@@ -244,6 +244,10 @@ const PostCard = ({ post, onLike, onPostClick }) => {
   const [comment, setComment] = useState("");
   const [isLiking, setIsLiking] = useState(false);
   const [doubleHeartVisible, setDoubleHeartVisible] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [deletingFromCard, setDeletingFromCard] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const isOwner = currentUserId && post.user_id === currentUserId;
 
   const timeAgo = (date) => {
     const diff = Date.now() - new Date(date).getTime();
@@ -332,16 +336,71 @@ const PostCard = ({ post, onLike, onPostClick }) => {
             </div>
           )}
         </div>
-        <button
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: 8,
-          }}
-        >
-          <MoreIcon />
-        </button>
+        {isOwner && (
+          <button
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 8,
+            }}
+            onClick={(e) => { e.stopPropagation(); setShowOptions(true); }}
+            title="More options"
+          >
+            <MoreIcon />
+          </button>
+        )}
+        {/* Options sheet */}
+        {showOptions && (
+          <>
+            <div
+              onClick={() => setShowOptions(false)}
+              style={{
+                position: "fixed", inset: 0, zIndex: 500,
+                backgroundColor: "rgba(0,0,0,0.4)",
+              }}
+            />
+            <div style={{
+              position: "fixed", left: "50%", top: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 501, backgroundColor: "#fff",
+              borderRadius: 12, overflow: "hidden",
+              width: 260, boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
+            }}>
+              <button
+                onClick={() => { setShowOptions(false); setShowEditModal(true); }}
+                style={cardSheetBtn}
+              >✏️ Edit</button>
+              <div style={{ height: 1, backgroundColor: "#efefef" }} />
+              <button
+                disabled={deletingFromCard}
+                onClick={async () => {
+                  setDeletingFromCard(true);
+                  try {
+                    await postAPI.delete(post.post_id);
+                    onDelete?.(post.post_id);
+                  } catch (err) {
+                    console.error("Delete failed:", err);
+                    setDeletingFromCard(false);
+                    setShowOptions(false);
+                  }
+                }}
+                style={{ ...cardSheetBtn, color: "#ed4956", fontWeight: "600" }}
+              >{deletingFromCard ? "Deleting…" : "🗑️ Delete"}</button>
+              <div style={{ height: 1, backgroundColor: "#efefef" }} />
+              <button onClick={() => setShowOptions(false)} style={{ ...cardSheetBtn, color: "#8e8e8e" }}>Cancel</button>
+            </div>
+          </>
+        )}
+        {/* Edit via PostModal */}
+        {showEditModal && (
+          <PostModal
+            postId={post.post_id}
+            onClose={() => setShowEditModal(false)}
+            onDeleted={(pid) => { setShowEditModal(false); onDelete?.(pid); }}
+            onUpdated={(pid, data) => { setShowEditModal(false); onEdit?.(pid, data); }}
+          />
+        )}
       </div>
 
       <div
@@ -572,6 +631,12 @@ const PostCard = ({ post, onLike, onPostClick }) => {
       )}
     </div>
   );
+};
+
+const cardSheetBtn = {
+  display: 'block', width: '100%', padding: '14px 20px',
+  background: 'none', border: 'none', cursor: 'pointer',
+  fontSize: 14, color: '#262626', textAlign: 'left',
 };
 
 const SuggestedUser = ({ user_id, username, subtitle, onFollowed }) => {
@@ -1001,7 +1066,12 @@ export default function Feed() {
                 <div key={post.post_id} style={{ marginBottom: 24 }}>
                   <PostCard
                     post={post}
+                    currentUserId={user?.user_id}
                     onPostClick={(postId) => setSelectedPostId(postId)}
+                    onDelete={(pid) => setPosts((prev) => prev.filter((p) => p.post_id !== pid))}
+                    onEdit={(pid, data) => setPosts((prev) =>
+                      prev.map((p) => p.post_id === pid ? { ...p, ...data } : p)
+                    )}
                   />
                 </div>
               ))}
@@ -1152,6 +1222,15 @@ export default function Feed() {
         <PostModal
           postId={selectedPostId}
           onClose={() => setSelectedPostId(null)}
+          onDeleted={(pid) => {
+            setPosts((prev) => prev.filter((p) => p.post_id !== pid));
+            setSelectedPostId(null);
+          }}
+          onUpdated={(pid, data) => {
+            setPosts((prev) =>
+              prev.map((p) => p.post_id === pid ? { ...p, ...data } : p)
+            );
+          }}
         />
       )}
       {showStoriesViewer && (
