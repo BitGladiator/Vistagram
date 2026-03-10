@@ -271,10 +271,19 @@ export default function Profile() {
       setProfile(profileData);
       setStats((s) => ({
         ...s,
-        followers: profileData?.followers_count || 0,
+        followers: profileData?.followers_count || profileData?.follower_count || 0,
         following: profileData?.following_count || 0,
       }));
       setFollowing(profileData?.is_following || false);
+      
+      if (!isOwnProfile) {
+        try {
+          const followRes = await socialAPI.checkFollowing(profileId);
+          setFollowing(followRes.data?.data?.is_following || false);
+        } catch (err) {
+          console.error("Failed to check follow status:", err);
+        }
+      }
     } catch (err) {
       console.error("Failed to load profile:", err);
     } finally {

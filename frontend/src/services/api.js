@@ -80,6 +80,7 @@ export const postAPI = {
 export const socialAPI = {
   follow: (userId) => api.post(`/api/v1/follows/${userId}`),
   unfollow: (userId) => api.delete(`/api/v1/follows/${userId}`),
+  checkFollowing: (userId) => api.get(`/api/v1/follows/${userId}/check`),
   like: (postId) => api.post(`/api/v1/likes/${postId}`),
   unlike: (postId) => api.delete(`/api/v1/likes/${postId}`),
   comment: (postId, data) => api.post(`/api/v1/comments/${postId}`, data),
