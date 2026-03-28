@@ -1,4 +1,3 @@
-# From vistagram directory
 for service in user-service post-service social-service feed-service media-service notification-service search-service; do
 cat > services/$service/Dockerfile << 'EOF'
 FROM node:18-alpine
