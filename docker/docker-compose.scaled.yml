@@ -1,0 +1,40 @@
+services:
+  user-service:
+    image: vistagram/user-service:latest
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - vistagram-network
+
+  feed-service:
+    image: vistagram/feed-service:latest
+    deploy:
+      replicas: 5 
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - vistagram-network
+
+  nginx-lb:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx-lb.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - user-service
+      - feed-service
+    networks:
+      - vistagram-network
