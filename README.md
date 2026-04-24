@@ -732,16 +732,6 @@ Open http://localhost:15672 (guest/guest)
 - CORS configured for allowed origins
 - Rate limiting at NGINX layer
 
-### Best Practices
-
-- Never commit environment files
-- Rotate JWT secrets regularly
-- Use HTTPS in production
-- Implement proper error handling
-- Log security events
-- Regular dependency updates
-
-
 ## Acknowledgments
 
 Built as a demonstration of production-grade microservices architecture and modern web development practices.
