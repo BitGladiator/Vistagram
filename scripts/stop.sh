@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#   Vistagram - Stop Script
-#   Usage: ./scripts/stop.sh
 
-# ---- Config --------------------------------
+
+
+
 DOCKER_DIR="$(dirname "$0")/../docker"
-# --------------------------------------------
+
 
 # Colors
 RED='\033[0;31m'
@@ -13,7 +13,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 BOLD='\033[1m'
-NC='\033[0m' # No Color
+NC='\033[0m' 
 
 echo ""
 echo -e "${BLUE}${BOLD}Stopping Vistagram Environment...${NC}"
@@ -27,7 +27,7 @@ fi
 
 cd "$DOCKER_DIR" || exit 1
 
-# Build the Compose command with the correct env files
+
 COMPOSE_CMD="docker compose"
 
 if [ -f ".env.docker" ]; then

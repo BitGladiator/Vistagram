@@ -99,7 +99,7 @@ const CommentItem = ({ comment }) => {
   );
 };
 
-// ── Options Sheet ─────────────────────────────────────────────────────────────
+
 
 const OptionsSheet = ({ onEdit, onDelete, onClose }) => (
   <>

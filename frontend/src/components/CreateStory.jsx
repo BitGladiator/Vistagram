@@ -140,7 +140,7 @@ export default function CreateStory({ onClose, onSuccess }) {
             {error && <p style={styles.error}>{error}</p>}
           </div>
         ) : (
-          // Preview
+
           <div style={styles.previewContainer}>
             <img src={preview} alt="preview" style={styles.previewImage} />
 

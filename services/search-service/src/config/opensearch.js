@@ -8,16 +8,23 @@ const client = new Client({
   }
 });
 
-// Test connection
-const connect = async () => {
-  try {
-    const info = await client.info();
-    console.log(`Connected to OpenSearch: ${info.body.version.number}`);
-    return true;
-  } catch (error) {
-    console.error('OpenSearch connection error:', error.message);
-    return false;
+// Connect with exponential backoff retry
+const connect = async ({ retries = 10, initialDelay = 3000, maxDelay = 30000 } = {}) => {
+  let delay = initialDelay;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const info = await client.info();
+      console.log(`Connected to OpenSearch: ${info.body.version.number}`);
+      return true;
+    } catch (error) {
+      console.error(`OpenSearch connection error (attempt ${attempt}/${retries}):`, error.message);
+      if (attempt === retries) return false;
+      console.log(`Retrying in ${delay / 1000}s...`);
+      await new Promise(res => setTimeout(res, delay));
+      delay = Math.min(delay * 1.5, maxDelay);
+    }
   }
+  return false;
 };
 
 // Index names

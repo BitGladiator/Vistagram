@@ -31,11 +31,13 @@ api.interceptors.request.use((config) => {
 });
 
 
-// Handle token expiry globally
+// Handle token expiry globally — skip auth routes so login/register handle their own errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isAuthRoute = error.config?.url?.includes('/users/login') ||
+                        error.config?.url?.includes('/users/register');
+    if (error.response?.status === 401 && !isAuthRoute) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";

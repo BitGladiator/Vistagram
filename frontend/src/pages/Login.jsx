@@ -23,10 +23,19 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await authAPI.login({ username, password });
-      login(res.data.data.user, res.data.data.token);
+      const { user, token } = res.data.data;
+      login(user, token);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.error?.message || 'Something went wrong');
+      console.error('[Login] Error:', err);
+      // Network / CORS failure — no response at all
+      if (!err.response) {
+        setError('Cannot reach server. Check your connection.');
+        return;
+      }
+      // HTTP error with a message from the API
+      const msg = err.response?.data?.error?.message;
+      setError(msg || `Error ${err.response.status}: Something went wrong`);
     } finally {
       setLoading(false);
     }

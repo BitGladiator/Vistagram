@@ -1,6 +1,4 @@
-version: '3.8'
 
-# Load secrets from .env.docker file
 # Run: docker-compose --env-file .env.docker up -d
 
 services:
@@ -14,8 +12,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ../services/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ../services/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ../services/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ../services/nginx/conf.d/vistagram.conf:/etc/nginx/conf.d/vistagram.conf:ro
+      - ../services/nginx/conf.d/proxy_params.conf:/etc/nginx/proxy_params.conf:ro
       - nginx_logs:/var/log/nginx
     depends_on:
       - user-service
@@ -48,10 +47,14 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${USER_SERVICE_JWT_EXPIRES_IN}
       - BCRYPT_ROUNDS=${USER_SERVICE_BCRYPT_ROUNDS}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
     networks:
       - vistagram-network
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     restart: unless-stopped
 
@@ -70,6 +73,7 @@ services:
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
       - SOCIAL_SERVICE_URL=http://social-service:3003
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
     networks:
       - vistagram-network
     depends_on:
@@ -91,6 +95,7 @@ services:
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
     networks:
       - vistagram-network
     depends_on:
@@ -121,6 +126,7 @@ services:
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
       - FEED_PAGE_SIZE=${FEED_PAGE_SIZE}
       - CELEBRITY_THRESHOLD=${CELEBRITY_THRESHOLD}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
     networks:
       - vistagram-network
     depends_on:
@@ -154,6 +160,7 @@ services:
       - CDN_URL=${CDN_URL}
       - MAX_FILE_SIZE=${MAX_FILE_SIZE}
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
     networks:
       - vistagram-network
     depends_on:
@@ -179,6 +186,7 @@ services:
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
     networks:
       - vistagram-network
     depends_on:
@@ -211,6 +219,7 @@ services:
       - MAX_SEARCH_RESULTS=${MAX_SEARCH_RESULTS}
       - MIN_QUERY_LENGTH=${MIN_QUERY_LENGTH}
       - REDIS_SEARCH_TTL=${REDIS_SEARCH_TTL}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
     networks:
       - vistagram-network
     depends_on:
@@ -321,14 +330,15 @@ services:
       - "9200:9200"
       - "9600:9600"
     volumes:
-      - ../databases/opensearch/data:/usr/share/opensearch/data
+      - opensearch_data:/usr/share/opensearch/data
     networks:
       - vistagram-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s || wget -qO- http://localhost:9200/_cluster/health || exit 1"]
       interval: 30s
-      timeout: 10s
-      retries: 5
+      timeout: 15s
+      retries: 10
+      start_period: 60s
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.11.0
@@ -347,6 +357,7 @@ services:
 # Volumes
 volumes:
   nginx_logs:
+  opensearch_data:
 
 
 # Networks

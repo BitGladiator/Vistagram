@@ -1,15 +1,12 @@
 #!/bin/bash
 
 
-#   Vistagram - Start Script
-#   Usage: ./scripts/start-vistagram.sh
 
-# ---- Config --------------------------------
 NGROK_DOMAIN="photobathic-epiblastic-noble.ngrok-free.dev"
 DOCKER_DIR="$(dirname "$0")/../docker"
 ENV_FILE=".env.docker"
 API_PORT=3000
-# --------------------------------------------
+
 
 # Colors
 RED='\033[0;31m'
@@ -18,7 +15,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 BOLD='\033[1m'
-NC='\033[0m' # No Color
+NC='\033[0m' 
 
 # Banner
 echo ""
@@ -33,7 +30,7 @@ echo -e "${NC}"
 echo -e "${BOLD}  Instagram Clone Backend${NC}"
 echo ""
 
-# Step 1: Check dependencies
+
 echo -e "${BLUE}[1/4]${NC} Checking dependencies..."
 
 if ! command -v docker &> /dev/null; then
@@ -48,7 +45,7 @@ if ! command -v ngrok &> /dev/null; then
 fi
 echo -e "  ${GREEN}✓ Ngrok found${NC}"
 
-# Step 2: Check env file 
+
 echo ""
 echo -e "${BLUE}[2/4]${NC} Checking environment..."
 
@@ -59,13 +56,13 @@ if [ ! -f "$DOCKER_DIR/$ENV_FILE" ]; then
 fi
 echo -e "  ${GREEN}✓ Environment file found${NC}"
 
-# Step 3: Start Docker services 
+
 echo ""
 echo -e "${BLUE}[3/4]${NC} Starting Docker services..."
 
 cd "$DOCKER_DIR" || exit 1
 
-# Check if already running
+
 RUNNING=$(docker compose --env-file $ENV_FILE ps --status running -q 2>/dev/null | wc -l)
 
 if [ "$RUNNING" -gt 5 ]; then
@@ -80,7 +77,7 @@ else
   sleep 8
 fi
 
-# Health check
+
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:$API_PORT/health" 2>/dev/null)
 
 if [ "$HTTP_STATUS" = "200" ]; then
@@ -92,7 +89,7 @@ fi
 
 cd - > /dev/null || exit 1
 
-# Step 4: Start Ngrok tunnel 
+ 
 echo ""
 echo -e "${BLUE}[4/4]${NC} Starting public tunnel..."
 echo ""
@@ -114,10 +111,10 @@ echo ""
 echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Start ngrok (this blocks until Ctrl+C)
+
 ngrok http --domain="$NGROK_DOMAIN" $API_PORT
 
-# =Cleanup on exit 
+
 echo ""
 echo -e "${YELLOW}Tunnel closed.${NC}"
 echo -e "Docker services are still running in background."

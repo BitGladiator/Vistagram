@@ -58,10 +58,10 @@ const startServer = async () => {
   // Connect to Redis
   await redis.connect();
 
-  // Connect to OpenSearch
-  const osConnected = await connectOpenSearch();
+  // Connect to OpenSearch (retry with backoff — OpenSearch can take 60–90s to boot)
+  const osConnected = await connectOpenSearch({ retries: 10, initialDelay: 3000, maxDelay: 30000 });
   if (!osConnected) {
-    console.error('Could not connect to OpenSearch. Make sure it is running!');
+    console.error('FATAL: Could not connect to OpenSearch after all retries. Exiting.');
     process.exit(1);
   }
 

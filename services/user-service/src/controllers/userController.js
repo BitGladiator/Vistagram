@@ -94,6 +94,17 @@ const register = async (req, res, next) => {
       },
     });
   } catch (error) {
+    // Postgres unique constraint violation (duplicate username or email)
+    if (error.code === '23505') {
+      const field = error.constraint && error.constraint.includes('email') ? 'email' : 'username';
+      return res.status(409).json({
+        status: 'error',
+        error: {
+          code: 'CONFLICT',
+          message: `An account with that ${field} already exists`,
+        },
+      });
+    }
     next(error);
   }
 };
